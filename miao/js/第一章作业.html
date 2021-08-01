@@ -1,0 +1,98 @@
+<script>
+  x = 2021
+  console.log(1, 2)
+  console.log( x , 'x的值') // 输出x
+  console.log( 2 * x , 'x的两倍') // 输出x的两倍
+  console.log( x * x ) // 输出x的
+  console.log( x * x * x * x * x ) // 输出x的五次平方
+  console.log( x > 50 && x < 100 ) // 输出x是否在50到100以内，是输出true，不是输出false
+  console.log( x % 2 === 1 ) // 输出x是否为奇数，是输出true，不是输出false
+  console.log( x % 2 === 0 ) // 输出x是否为偶数，是输出true，不是输出false
+  console.log( x % 10 ) // 输出x的个位数
+  console.log( x % 100 ) // 输出x百位数以下的部分，对于2021，即输出21，对于2035，即输出35
+  console.log( x > 200 && x % 3 === 0 && x % 7 !== 0 ) // 输出x是否大于200且为3的倍数但不是7的倍数。
+  console.log( (x - x % 100) / 100 + 1 ) // 输出x做为年份时，所在的世纪，对于2021即输出21，对于1864即输出19
+  console.log( x % 400 == 0 || x % 4 == 0 && x % 100 != 0 ) // 输出x做为年份时，是否为闰年，是输出true，不是输出false
+  console.log( (x == 2 || x == 3 || x == 5 || x == 7) || (x % 2 !== 0 && x % 3 !== 0 && x % 5 !== 0 && x % 7 !== 0) ) // 输出x是否为素数（此时x范围为100以内）
+  console.log( !(x % 2 == 0 || x % 3 == 0 || x % 5 == 0 || x % 7 == 0) || (x == 2 || x == 3 || x== 5 || x== 7) )
+  // console.log( x != (x % 2 == 0 || x % 3 == 0 || x % 5 == 0 || x % 7 == 0) )
+</script>
+
+<script>
+  var a = +prompt('请输入a的值：')
+  var b = +prompt('请输入b的值：')
+  var c = +prompt('请输入c的值：')
+
+  var delta = b * b - 4 * a * c
+
+  if (delta > 0) {
+    var sd = Math.sqrt(delta)
+
+    var x1 = (-b + sd) / (2 * a)
+    var x2 = (-b - sd) / 2 / a
+
+    console.log(x1)
+    console.log(x2)
+  } else if (delta == 0) {
+    var x = (-b) / (2 * a)
+    console.log(x)
+  } else {
+    console.log('没有实根')
+  }
+
+
+
+  if () {
+
+  }
+
+  if () {
+
+  }
+
+
+
+
+
+
+
+
+
+  var sd = Math.sqrt(delta)
+
+  var x1 = (-b + sd) / (2 * a)
+  var x2 = (-b - sd) / 2 / a
+
+  console.log(x1)
+  console.log(x2)
+
+</script>
+
+<script>
+  var a = 3
+  var b = 9
+  var c = 5
+  var d = 8
+  var e = 11
+  var f = 876
+
+  var x = (c * d - f * b) / (a * e - b * d)
+  var y = (d * c - a * f) / (b * d - a * e)
+
+  console.log(x)
+  console.log(y)
+
+
+</script>
+
+<script>
+  var a = 1
+  alert(a)
+  console.log(a)
+  a = a + 1
+  alert(a)
+  sin(2.5)
+
+  a = a + 1
+  alert(a)
+</script>

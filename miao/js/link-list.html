@@ -1,0 +1,154 @@
+数组使用连续的空间存储
+易查找：根据下标及数组自身的起始地址计算出目标地址就可以直接读
+难增删：在中间增加元素时需要将后面的元素整体向后移动
+在低级语言里：长度不可变
+
+链表是一种由多个分散结点构成的结构，每个结点存储了下一个结点的位置
+易增删：增删时只影响需要增删的结点旁边的结点
+难查找：必须顺着头部按顺序找下去
+在低级语言里长度也是可变的，并且几乎没有空间浪费
+<script>
+  function createListNode(val) {
+    return {
+      val: val,
+      next: null,
+    }
+  }
+
+  function arrayToList(array) {
+    var dummy = createListNode(0)
+    var prev = dummy
+
+    for (var i = 0; i < array.length; i++) {
+      var node = createListNode(array[i]) // 由数组元素创建新的链表结点
+      prev.next = node
+      prev = node
+    }
+
+    return dummy.next
+  }
+  function arrayToList2(array) {
+    if (array.length == 0) {
+      return null
+    }
+    var head = createListNode(array[0])
+    var prev = head
+    for (var i = 1; i < array.length; i++) {
+      var node = createListNode(array[i])
+      prev.next = node
+      prev = node
+    }
+    return head
+  }
+  function arrayToList3(array) {
+    if (array.length == 0) {
+      return null
+    }
+    var nodes = []
+    for (var i = 0; i < array.length; i++) {
+      nodes.push(
+        createListNode(array[i])
+      )
+    }
+    for (var i = 0; i < array.length - 1; i++) {
+      nodes[i].next = nodes[i + 1]
+    }
+    return nodes[0]
+  }
+
+  function arrayToList4(array) {
+    if (array.length == 0) {
+      return null
+    }
+    var head = createListNode(array[0])
+    head.next = arrayToList4(array.slice(1))
+    return head
+  }
+
+  function arrayToList5(array) {
+    var l = null
+    for (var i = 0; i < array.length; i++) {
+      l = append2(array[i], l)
+    }
+    return l
+  }
+
+  function listToArray(head) {
+    var array = []
+    while (head) {
+      array.push(head.val)
+      head = head.next
+    }
+    return array
+  }
+
+  function listToArray2(head) {
+    if (!head) {
+      return []
+    }
+    return [head.val].concat(  listToArray(head.next)  )
+  }
+
+  function listToArray3(head, ary = [], pos = 0) {
+    if (!head) {
+      return ary
+    }
+    ary[pos] = head.val
+    listToArray3(head.next, ary, pos + 1)
+    return ary
+  }
+
+  function prepend(val, head) {
+    var node = createListNode(val)
+    node.next = head
+    return node
+  }
+
+  function append(val, head) {
+    var node = createListNode(val)
+    if (!head) {
+      return node
+    }
+    var p = head
+    while (p.next) {
+      p = p.next
+    }
+    p.next = node
+    return head
+  }
+
+  function append2(val, head) {
+    if (!head) {
+      return createListNode(val)
+    }
+    head.next = append2(val, head.next)
+    return head
+  }
+
+
+  // 返回链表第n个结点的值
+  function nth(head, n) {
+    var p = head
+
+    if (n < 0) {
+      return
+    }
+
+    while (p && n--) {
+      p = p.next
+    }
+
+    return p ? p.val : undefined
+  }
+
+  function nth2(l, n) {
+    if (!l || n < 0) {
+      return undefined
+    }
+    if (n == 0) {
+      return l.val
+    }
+    return nth2(l.next, n - 1)
+  }
+
+</script>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    input[type="text"], textarea {
+      width: 300px;
+    }
+    label {
+      font-family: consolas;
+      cursor: pointer;
+    }
+    label input {
+      cursor: pointer;
+    }
+    em {
+      background-color: #9fcfff;
+      font-style: normal;
+    }
+    em:empty {
+      border-right: 1px dotted red;
+      margin-right: -1px;
+      background-color: transparent;
+    }
+    em:nth-of-type(even) {
+      background-color: #d5ebff;
+    }
+    section {
+      width: 300px;
+      position: relative;
+      overflow: hidden;
+    }
+    section textarea,
+    section pre {
+      line-height: 1.3;
+      display: block;
+      padding: 5px;
+      border: 2px solid;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: consolas;
+      font-size: 16px;
+      white-space: pre-wrap;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+    section textarea {
+      position: relative;
+      z-index: 8;
+      background-color: transparent;
+    }
+    section pre {
+      color: transparent;
+      position: absolute;
+      top: 0;
+    }
+    p#regError {
+      color: red;
+      margin: 0;
+      height: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    请输入正则表达式：
+    <label><input type="checkbox" onclick="run()" id="ignoreCase">i</label>
+    <label><input type="checkbox" checked onclick="run()" id="global">g</label>
+    <label><input type="checkbox" onclick="run()" id="multiline">m</label>
+    <br>
+    <input type="text" id="reg" value="fo." oninput="run()"> <br>
+    <p id="regError"></p>
+    请输入内容：<br>
+    <section>
+      <pre id="result">
+      </pre>
+      <textarea onscroll="setScroll()" spellcheck="false" id="strInput" cols="30" oninput="run()" rows="10">foobarbaz aaabbccc
+      ddddoofob foa foceeefoofsl lksdjf
+    129842 foo
+  sd942034 234 lsfowe</textarea>
+    </section>
+
+  </div>
+  <script>
+    function setScroll() {
+      var scrollTop = strInput.scrollTop
+      result.style.top = -strInput.scrollTop + 'px'
+    }
+    function run() {
+      console.time('run')
+      var regSource = reg.value
+      console.log(regSource)
+      var flags = getFlags()
+      if (regSource == '') {
+        result.innerHTML = ''
+        regError.innerHTML = 'Please input any regular exrpession.'
+        return
+      }
+      try {
+        var re = new RegExp(regSource, flags)
+        regError.innerHTML = ''
+      } catch(e) {
+        console.log(e)
+        regError.innerHTML = e.message
+        result.innerHTML = ''
+        return
+      }
+      console.log(re)
+      var str = strInput.value
+      console.log(str)
+      var match
+      if (re.global) {
+        var resultHTML = ''
+        var lastIndex = re.lastIndex
+        while (match = re.exec(str)) {
+          resultHTML += str.slice(lastIndex, match.index)
+          resultHTML += '<em>' + match[0] + '</em>'
+          lastIndex = re.lastIndex
+          if (match[0] == '') {
+            re.lastIndex++
+          }
+        }
+        resultHTML += str.slice(lastIndex)
+        result.innerHTML = resultHTML
+      } else { // no global
+        var resultHTML = ''
+        match = re.exec(str)
+        resultHTML += str.slice(0, match.index)
+        resultHTML += '<em>' + match[0] + '</em>'
+        resultHTML += str.slice(match[0].length + match.index)
+        result.innerHTML = resultHTML
+      }
+      console.timeEnd('run')
+    }
+
+    run()
+
+    function getFlags() {
+      var flags = ''
+      if (ignoreCase.checked) {
+        flags += 'i'
+      }
+      if (global.checked) {
+        flags += 'g'
+      }
+      if (multiline.checked) {
+        flags += 'm'
+      }
+      return flags
+    }
+  </script>
+</body>
+</html>
