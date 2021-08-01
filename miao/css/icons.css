@@ -1,0 +1,32 @@
+[class^="icon-"], [class*=" icon-"] {
+  background-image: url(nav_logo240_hr.webp);
+  display: inline-block;
+}
+
+.icon-phone {
+  background-position: 0 -178px;
+  width: 26px;
+  height: 32px;
+}
+.icon-phone-x2 {
+  background-position: 0 -178px;
+  width: 26px;
+  height: 32px;
+  zoom: 2;
+}
+.icon-phone-2x {
+  background-size: 668px;
+  background-position: 0 calc(2 * (-178px));
+  width: calc(2 * 26px);
+  height: calc(2 * 32px);
+}
+.icon-star-o {
+  background-position: -55px -278px;
+  width: 26px;
+  height: 32px;
+}
+.icon-star {
+  background-position: -50px -378px;
+  width: 26px;
+  height: 32px;
+}

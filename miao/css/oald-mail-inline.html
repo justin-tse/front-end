@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    * {
+      box-sizing: inherit;
+    }
+    div {
+      height: 100%;
+      font-size: 0;
+    }
+    section {
+      display: inline-block;
+      font-size: 16px;
+    }
+    .a1, .a2, .a3, .a4 {
+      box-sizing: border-box;
+      width: 150px;
+      height: 100%;
+      border-right: 3px solid red;
+      vertical-align: top;
+    }
+    .a2 {
+      width: calc(100% - 450px);
+    }
+    header {
+      display: inline-block;
+      width: 100%;
+      height: 100px;
+      box-sizing: border-box;
+      vertical-align: bottom;
+      border-bottom: 3px solid red;
+    }
+    main {
+      display: inline-block;
+      vertical-align: bottom;
+      width: 100%;
+      height: calc(100% - 100px);
+      overflow: scroll;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <section class="a1"></section>
+    <section class="a2">
+      <header></header>
+      <main>
+        <img src="https://www.12306.cn/index/images/abanner02.jpg" alt="">
+      </main>
+    </section>
+    <section class="a3"></section>
+    <section class="a4"></section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<foo>
+  <bar c="aaa" a="111" b="222">aaaa</bar>
+  <site></site>
+  <teams>
+    <team>
+      <name>hong dui</name>
+      <score>28</score>
+    </team>
+    <team>
+      <name>hong dui</name>
+      <score>28</score>
+    </team>
+    <team>
+      <name>hong dui</name>
+      <score>28</score>
+    </team>
+  </teams>
+</foo>

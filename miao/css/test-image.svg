@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<svg width="400" height="300" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <g id="cat" transform="translate(50, 50)">
+    <rect x="10" y="10" rx="10" ry="10" width="50" height="50" fill="red" stroke-width="15" stroke="aqua" />
+    <g>
+      <circle cx="100" cy="100" r="50" fill="lime" stroke="red" stroke-width="5"/>
+    </g>
+  </g>
+
+  <!-- <ellipse cx="130" cy="150" rx="130" ry="60" fill="blue"/> -->
+  <!-- <line x1="0" y1="0" x2="300" y2="200" style="stroke:black;stroke-width:15" />
+  <polyline points="20 20 100, 10 100 80 90 50" fill="transparent" stroke="magenta" stroke-width="5"/> -->
+  <path d="M 20 20 l 40 30 L 70 130 L 100 50 H 200 V 25 H 250 v 50 h 50 v 50 c 40 30 -20 4 -94 105 s 30 40 50 60 A 100 50 126 1 0 200 150 Z  M" fill="yellow" stroke="blue" stroke-width="5" />
+</svg>

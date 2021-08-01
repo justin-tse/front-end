@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+    }
+    header {
+      height: 80px;
+      background-color: red;
+    }
+    header:hover {
+      background-color: magenta;
+    }
+    div {
+      height: 100%;
+      min-width: 700px;
+    }
+    aside {
+      xborder-top: 80px solid transparent;
+      xbox-sizing: border-box;
+      background-color: tan;
+      width: 200px;
+      height: calc(100% - 80px);
+      xmargin-top: -80px;
+      overflow: scroll;
+      position: relative;
+    }
+    main {
+      box-sizing: border-box;
+      width: 100%;
+      border-left: 200px red solid;
+      height: calc(100% - 80px);
+      margin-top: calc(-100vh + 80px);
+      xmargin-left: 200px;
+      background-color: violet;
+      overflow: scroll;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <header></header>
+    <aside>aa</aside>
+    <main></main>
+  </div>
+</body>
+</html>

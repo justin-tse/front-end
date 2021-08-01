@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- <link rel="stylesheet" type="text/less" href="styles.css"> -->
+  <style type="text/less">
+    * {
+      background-color: rgba(0,0,0,0.08);
+      xbox-shadow: inset 0 0 1px aquamarine;
+    }
+    body {
+      margin: 0;
+      overflow-y: scroll;
+    }
+    a {
+      text-decoration: none;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    input, textarea, select {
+      outline: none;
+    }
+    .page-container {
+      min-width: 1226px;
+    }
+    .top-nav {
+      background-color: #333;
+      xmin-width: 1226px;
+      xheight: 40px;
+      xoverflow: hidden;
+      .top-nav-inner {
+        width: 1226px;
+        margin: auto;
+        line-height: 40px;
+        font-size: 12px;
+        display: flex;
+        a {
+          color: #eee;
+          display: inline-block;
+        }
+        div.top-nav-links {
+          margin-right: auto;
+          .sep {
+            color: #ddd;
+            margin: 0 4px;
+          }
+          .download-app {
+            position: relative;
+            &:hover .app-qr-code {
+              height: 130px;
+            }
+            .app-qr-code {
+              overflow: hidden;
+              transition: 1s;
+              height: 0;
+              position: absolute;
+              top: 100%;
+              left: 50%;
+              transform: translatex(-50%);
+              padding: 0 10px;
+              background-color: white;
+              color: black;
+              text-align: center;
+              line-height: normal;
+              font-size: 14px;
+              img {
+                margin-top: 10px;
+                width: 90px;
+                height: 90px;
+              }
+            }
+          }
+        }
+
+        div.top-nav-funcs {
+          xfloat: right;
+          .notifications {
+            margin-left: 4px;
+          }
+          .shopping-cart {
+            padding: 0 20px;
+            background-color: #424242;
+            &:hover {
+              color: #ff6700;
+              background-color: white;
+            }
+          }
+        }
+      }
+    }
+    .product-nav {
+      height: 100px;
+      position: relative;
+      background-color: lime;
+      .product-nav-inner {
+        margin: auto;
+        width: 1226px;
+        display: flex;
+        align-items: center;
+        .brand-logo {
+          margin-right: 150px;
+          img {
+            width: 50px;
+            height: 50px;
+          }
+        }
+        ul.product-links {
+          display: flex;
+          margin: 0;
+          &:hover .product-sub-links{
+            height: 200px;
+          }
+          > li { //小米手机层级
+            a {
+              line-height: 100px;
+              padding: 0 10px;
+            }
+            &:hover .product-sub-links {
+              z-index: 800;
+              transition: height 1s, z-index 0s;
+            }
+            .product-sub-links {
+              z-index: 200;
+              background-color: white;
+              overflow: hidden;
+              transition: height 1s, z-index 1s;
+              position: absolute;
+              width: 100%;
+              top: 100%;
+              left: 0;
+              height: 0;
+              > ul {
+                width: 1226px;
+                margin: auto;
+                height: 100%;
+                display: flex;
+
+                li {
+                  width: 203px;
+                }
+              }
+            }
+          }
+        }
+        form.search {
+          margin-left: auto;
+          display: flex;
+          height: 50px;
+          position: relative;
+          > input {
+            border: 1px solid black;
+            width: 200px;
+            box-sizing: border-box;
+            &:focus,
+            &:focus + button {
+              border-color: #ff6700;
+            }
+          }
+          > button {
+            border: 1px solid black;
+            border-left: none;
+            width: 50px;
+          }
+          > input:focus ~ .search-suggestions {
+            border-color: #ff6700;
+            display: block;
+          }
+          .search-suggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            border: 1px solid;
+            border-top: none;
+            width: 200px;
+            box-sizing: border-box;
+          }
+        }
+      }
+    }
+
+    .hero {
+      height: 460px;
+      width: 1226px;
+      margin: auto;
+      position: relative;
+      @keyframes leave {
+        from {
+          left: 0;
+        }
+        to {
+          left: 100%;
+        }
+      }
+
+      .hero-slider {
+        width: 1226px;
+        height: 460px;
+        position: relative;
+        margin: auto;
+        input {
+          display: none;
+
+          &:nth-child(1):checked ~ div.imgs div span:nth-child(1),
+          &:nth-child(2):checked ~ div.imgs div span:nth-child(2),
+          &:nth-child(3):checked ~ div.imgs div span:nth-child(3),
+          &:nth-child(4):checked ~ div.imgs div span:nth-child(4) {
+            left: 0;
+            transition: 0.5s;
+            animation: none;
+            z-index: 3;
+          }
+
+
+          &:nth-child(1):checked ~ div.labels label:nth-child(1),
+          &:nth-child(2):checked ~ div.labels label:nth-child(2),
+          &:nth-child(3):checked ~ div.labels label:nth-child(3),
+          &:nth-child(4):checked ~ div.labels label:nth-child(4) {
+            background-color: blue;
+          }
+        }
+        div.imgs {
+          height: 100%;
+          width: 100%;
+          position: absolute;
+          top: 0;
+          div {
+            float: left;
+            width: 25%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            span {
+              position: absolute;
+              left: -100%;
+              width: 100%;
+              height: 100%;
+              animation: leave 1s;
+              background-size: 1226px 100%;
+              background-repeat: no-repeat;
+              transition: 1s;
+              &:nth-child(1) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/d7abb68ac50f82412d325f305cc62fb0.jpeg?w=2452&h=920);
+              }
+              &:nth-child(2) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/1c3e97686468231f3f78048d7f2b7fdc.jpg?thumb=1&w=1226&h=460&f=webp&q=90);
+              }
+              &:nth-child(3) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/bbcd4ba87a306e51f033f80d7ed65cce.jpg?thumb=1&w=1226&h=460&f=webp&q=90);
+              }
+              &:nth-child(4) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/320dd6910da4ad8e479fc235ee9696b8.jpg?thumb=1&w=1226&h=460&f=webp&q=90);
+              }
+              &:nth-child(5) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/d7abb68ac50f82412d325f305cc62fb0.jpeg?w=2452&h=920);
+              }
+              &:nth-child(6) {
+                background-image: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/1c3e97686468231f3f78048d7f2b7fdc.jpg?thumb=1&w=1226&h=460&f=webp&q=90);
+              }
+            }
+            &:nth-child(1) span {
+              background-position: 0 0;
+            }
+            &:nth-child(2) span {
+              background-position: -306.5px 0;
+            }
+            &:nth-child(3) span {
+              background-position: -613px 0;
+            }
+            &:nth-child(4) span {
+              background-position: -919.5px 0;
+            }
+          }
+        }
+        .labels {
+          display: flex;
+          justify-content: space-around;
+          position: absolute;
+          width: 100%;
+          bottom: 0;
+          z-index: 8;
+          label {
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            transition: 2s;
+          }
+        }
+        .left-labels, .right-labels {
+          width: 50px;
+          height: 50px;
+          top: 0;
+          bottom: 0;
+          position: absolute;
+          margin: auto;
+          z-index: 9;
+        }
+        .right-labels {
+          right: 0;
+        }
+        .left-labels label,
+        .right-labels label {
+          display: block;
+          width: 100%;
+          height: 100%;
+          display: none;
+          cursor: pointer;
+          background-color: red;
+        }
+        input:nth-child(1):checked ~ .left-labels [for="i4"],
+        input:nth-child(1):checked ~ .right-labels [for="i2"],
+        input:nth-child(2):checked ~ .left-labels [for="i1"],
+        input:nth-child(2):checked ~ .right-labels [for="i3"],
+        input:nth-child(3):checked ~ .left-labels [for="i2"],
+        input:nth-child(3):checked ~ .right-labels [for="i4"],
+        input:nth-child(4):checked ~ .left-labels [for="i3"],
+        input:nth-child(4):checked ~ .right-labels [for="i1"] {
+          display: block;
+        }
+      }
+
+      .hero-product-list {
+        width: 210px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        z-index: 888;
+        box-sizing: border-box;
+        padding: 20px 0;
+        > li {
+          height: 42px;
+          line-height: 42px;
+          font-size: 14px;
+          padding-left: 25px;
+          cursor: pointer;
+          a {
+            color: white;
+          }
+          &:hover {
+            background-color: #ff6700;
+          }
+          &:hover > .hero-product-sub-list {
+            display: block;
+          }
+          > .hero-product-sub-list {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            height: 460px;
+            xwidth: 200px;
+            background-color: red;
+            display: none;
+            > .item {
+              height: 76.66666px;
+              width: 225px;
+              box-sizing: border-box;
+              border: 2px solid;
+              &:nth-child(n + 7) {
+                margin-left: 225px;
+              }
+              &:nth-child(n + 13) {
+                margin-left: 450px;
+              }
+              &:nth-child(n + 19) {
+                margin-left: 675px;
+              }
+              &:nth-child(6n + 7) {
+                margin-top: -460px;
+              }
+            }
+          }
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <header>
+      <nav class="top-nav">
+        <div class="top-nav-inner">
+          <div class="top-nav-links">
+            <a href="#">小米商城</a>
+            <span class="sep">|</span>
+            <a href="#">MIUI</a>
+            <span class="sep">|</span>
+            <a href="#">IoT</a>
+            <span class="sep">|</span>
+            <a href="#">云服务</a>
+            <span class="sep">|</span>
+            <a href="#">天星数科</a>
+            <span class="sep">|</span>
+            <a href="#">有品</a>
+            <span class="sep">|</span>
+            <a href="#">小爱开放平台</a>
+            <span class="sep">|</span>
+            <a href="#">企业团购</a>
+            <span class="sep">|</span>
+            <a href="#">资质证照</a>
+            <span class="sep">|</span>
+            <a href="#">协议规则</a>
+            <span class="sep">|</span>
+            <a href="#" class="download-app">
+              下载app
+              <span class="app-qr-code">
+                <img src="https://i1.mifile.cn/f/i/17/appdownload/download.png?1" alt="">
+                小米商城 App
+              </span>
+            </a>
+            <span class="sep">|</span>
+            <a href="#">智能生活</a>
+            <span class="sep">|</span>
+            <a href="#">Select Location</a>
+          </div>
+          <div class="top-nav-funcs">
+            <a href="#">登陆</a>
+            <span class="sep">|</span>
+            <a href="#">注册</a>
+            <span class="sep">|</span>
+            <a href="#" class="notifications">消息通知</a>
+            <a href="" class="shopping-cart">
+              购物车 (0)
+            </a>
+          </div>
+        </div>
+      </nav>
+      <nav class="product-nav">
+        <div class="product-nav-inner">
+          <a href="#" class="brand-logo">
+            <img src="https://s02.mifile.cn/assets/static/image/logo-mi2.png" alt="">
+          </a>
+          <ul class="product-links">
+            <li>
+              <a href="#">小米手机</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li>小米手机</li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">Redmi 红米</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li>Redmi 红米</li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">电视</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li>电视</li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">笔记本</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li>笔记本</li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">家电</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li>家电</li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">路由器</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li>路由器</li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <a href="#">智能硬件</a>
+              <div class="product-sub-links">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li>智能硬件</li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+          <ul class="product-links">
+            <li>
+              <a href="#">服务</a>
+            </li>
+            <li>
+              <a href="#">社区</a>
+            </li>
+          </ul>
+          <form action="#" class="search">
+            <input type="text">
+            <button>搜</button>
+            <ul class="search-suggestions">
+              <li><a href="#">扫地机器人</a></li>
+              <li><a href="#">扫地机器人</a></li>
+              <li><a href="#">扫地机器人</a></li>
+              <li><a href="#">扫地机器人</a></li>
+              <li><a href="#">扫地机器人</a></li>
+              <li><a href="#">扫地机器人</a></li>
+            </ul>
+          </form>
+        </div>
+      </nav>
+    </header>
+    <div class="hero">
+      <section class="hero-slider">
+        <input type="radio" name="s1" id="i1" checked>
+        <input type="radio" name="s1" id="i2">
+        <input type="radio" name="s1" id="i3">
+        <input type="radio" name="s1" id="i4">
+        <input type="radio" name="s1" id="i5">
+        <input type="radio" name="s1" id="i6">
+
+
+        <div class=" btn-labels left-labels">
+          <label for="i1">go1</label>
+          <label for="i2">go2</label>
+          <label for="i3">go3</label>
+          <label for="i4">go4</label>
+        </div>
+        <div class=" btn-labels right-labels">
+          <label for="i1">go1</label>
+          <label for="i2">go2</label>
+          <label for="i3">go3</label>
+          <label for="i4">go4</label>
+        </div>
+        <div class="labels">
+          <label for="i1"></label>
+          <label for="i2"></label>
+          <label for="i3"></label>
+          <label for="i4"></label>
+          <label for="i5"></label>
+          <label for="i6"></label>
+        </div>
+        <div class="imgs">
+          <div>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </section>
+      <ul class="hero-product-list">
+        <li>
+          <a href="#">手机 电话卡</a>
+          <div class="hero-product-sub-list">
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+          </div>
+        </li>
+        <li>
+          <a href="#">电视 盒子</a>
+
+        </li>
+        <li>
+          <a href="#">笔记本 显示器</a>
+
+        </li>
+        <li>
+          <a href="#">家电 插线板</a>
+
+        </li>
+        <li>
+          <a href="#">出行 穿戴</a>
+
+        </li>
+        <li>
+          <a href="#">智能 路由器</a>
+
+        </li>
+        <li>
+          <a href="#">电源 配件</a>
+
+        </li>
+        <li>
+          <a href="#">健康 儿童</a>
+
+        </li>
+        <li>
+          <a href="#">耳机 音箱</a>
+
+        </li>
+        <li>
+          <a href="#">生活 箱包</a>
+
+        </li>
+      </ul>
+    </div>
+  </div>
+  <script src="less.min.js"></script>
+</body>
+</html>
