@@ -47,7 +47,8 @@
       font-size: 16px;
       white-space: pre-wrap;
       overflow-y: scroll;
-      overflow-x: hidden;
+      xoverflow-x: hidden;
+      word-break: break-all;
     }
     section textarea {
       position: relative;
@@ -89,7 +90,7 @@
   <script>
     function setScroll() {
       var scrollTop = strInput.scrollTop
-      result.style.top = -strInput.scrollTop + 'px'
+      result.scrollTop = scrollTop
     }
     function run() {
       console.time('run')
@@ -126,14 +127,14 @@
           }
         }
         resultHTML += str.slice(lastIndex)
-        result.innerHTML = resultHTML
+        result.innerHTML = resultHTML + '\n'
       } else { // no global
         var resultHTML = ''
         match = re.exec(str)
         resultHTML += str.slice(0, match.index)
         resultHTML += '<em>' + match[0] + '</em>'
         resultHTML += str.slice(match[0].length + match.index)
-        result.innerHTML = resultHTML
+        result.innerHTML = resultHTML + '\n'
       }
       console.timeEnd('run')
     }
