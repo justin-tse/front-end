@@ -20,13 +20,19 @@
       background-color: #9fcfff;
       font-style: normal;
     }
-    em:empty {
-      border-right: 1px dotted red;
-      margin-right: -1px;
-      background-color: transparent;
-    }
     em:nth-of-type(even) {
       background-color: #d5ebff;
+    }
+    em:empty {
+      border-left: 1px dashed red;
+      border-right: 1px dashed red;
+      /* width: 2px; */
+      height: 1.2em;
+      /* display: inline-block; */
+      /* background-color: rgb(255,0,0,0.6); */
+      margin-left: -1px;
+      margin-right: -1px;
+      background-color: transparent;
     }
     section {
       width: 300px;
@@ -80,15 +86,16 @@
     <section>
       <pre id="result">
       </pre>
-      <textarea onscroll="setScroll()" spellcheck="false" id="strInput" cols="30" oninput="run()" rows="10">foobarbaz aaabbccc
+      <textarea onscroll="syncScrollPos()" spellcheck="false" id="strInput" cols="30" oninput="run()" rows="10">foobarbaz aaabbccc
       ddddoofob foa foceeefoofsl lksdjf
     129842 foo
   sd942034 234 lsfowe</textarea>
     </section>
-
+    <!-- <marquee onmouseover="stop()" onmouseout="start()" behavior="" direction=""> sdfj lsdf </marquee> -->
   </div>
   <script>
-    function setScroll() {
+
+    function syncScrollPos() {
       var scrollTop = strInput.scrollTop
       result.scrollTop = scrollTop
     }

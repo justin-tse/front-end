@@ -1,0 +1,215 @@
+<script>
+
+  var parseJSON = (function() {
+    var str = '[1,"fooo",[1,222235,true],{"a":1,"b":[1,2,3],"c":{"x":1,"yyy":false}},5,null]'
+    var i = 0
+
+    // 递归下降：解析表示递归结构的字符串
+    // 每个函数的作用都是从i开始解析出对应的内容，并将i指向解析完成后的下一个位置，以供后续其它函数继续解析
+
+    return function parseJSON(input) {
+      str = input
+      i = 0
+      return parseValue()
+    }
+
+    function parseValue() {
+      var c = str[i]
+
+      if (c == '[') {
+        return parseArray()
+      }
+      if (c == '{') {
+        return parseObject()
+      }
+      if (c == '"') {
+        return parseString()
+      }
+      if (c == 't') {
+        return parseTrue()
+      }
+      if (c == 'f') {
+        return parseFalse()
+      }
+      if (c == 'n') {
+        return parseNull()
+      }
+      return parseNumber()
+    }
+
+    // 从i指向的位置解析出一个true，并将i指向true的下一个位置
+    function parseTrue() {
+      var s = str.substr(i, 4)
+      if (s !== 'true') {
+        throw new SyntaxError('unexpected token:' + s + 'at pos' + i)
+      }
+      i += 4
+      return true
+    }
+
+    function parseFalse() {
+      i += 5
+      return false
+    }
+
+    function parseNull() {
+      i += 4
+      return null
+    }
+
+    // 从i指向的位置（此时是"）解析出一个字符串，并将i移动到字符串之后
+    function parseString() {
+      i++ // 跳过当前双引号
+      var result = ''
+      while (str[i] !== '"') {
+        result += str[i++]
+      }
+      i++ // 跳过最后一个双引号
+      return result
+    }
+
+    // 从i指向的位置解析出一个数值，此时i已经指向了该数值的最左一位
+    function parseNumber() {
+      var numStr = ''
+      while (str[i] >= '0' && str[i] <= '9') {
+        numStr += str[i++]
+      }
+      return Number(numStr)
+    }
+
+    // 此时i指向数组开始的中括号（[），解析出这个数组，移动i到数组后面，并返回解析出的数组
+    function parseArray() {
+      var result = []
+      i++
+      while (str[i] !== ']') {
+        var val = parseValue()
+        result.push(val)
+        if (str[i] == ',') {
+          i++ // 跳过这个逗号
+        } else if (str[i] == ']') {
+          break
+        } else {
+          throw new SyntaxError('unexpected token at pos' + i)
+        }
+      }
+      i++
+      return result
+    }
+
+    // 此时i指向对象开始的中括号（{），解析出这个对象，移动i到对象后面，并返回解析出的对象
+    function parseObject() {
+      var result = {}
+      i++
+      while (str[i] !== '}') {
+        var key = parseString()
+        i++ // 跳过冒号
+        var val = parseValue()
+        result[key] = val
+        if (str[i] == ',') {
+          i++
+        }
+      }
+      i++
+      return result
+    }
+  })()
+
+  var parseExpression = (function() {
+    var str = "|(&(t,!(&(f,t,|(f,f))),t),!(t))"
+    var i = 0
+
+    return function parse(input) {
+      str = input
+      i = 0
+      return parseParameter()
+    }
+    function parseValue() {
+      if (str[i] == 't') {
+        i++
+        return true
+      } else if (str[i] == 'f') {
+        i++
+        return false
+      }
+    }
+    function parseParameter() {
+      if (str[i] == 't' || str[i] == 'f') {
+        return parseValue()
+      } else {
+        return parseFunctionCall()
+      }
+    }
+    function parseFunctionCall() {
+      var obj = {
+        funcName: str[i],
+        parameters: []
+      }
+      i++ // skip function name
+      i++ // skip (
+
+      while (str[i] !== ')') {
+        var parameter = parseParameter()
+        obj.parameters.push(parameter)
+        if (str[i] == ',') {
+          i++
+        }
+      }
+      i++ // skip )
+      return obj
+    }
+  })()
+  // 执行表达式的结果
+  function evaluate(tree) {
+    if (typeof tree == 'object') { // function call
+      var parameterValues = tree.parameters.map(evaluate)
+      if (tree.funcName == '&') {
+        for (var i = 0; i < parameterValues.length; i++) {
+          if (parameterValues[i] == false) {
+            return false
+          }
+        }
+        return true
+      }
+      if (tree.funcName == '|') {
+        for (var i = 0; i < parameterValues.length; i++) {
+          if (parameterValues[i] == true) {
+            return true
+          }
+        }
+        return false
+      }
+      if (tree.funcName == '!') {
+        return !parameterValues[0]
+      }
+    } else {
+      return tree
+    }
+  }
+  // 输出js语法的代码
+  function outputJS(tree) {
+    if (typeof tree == 'object') {
+      if (tree.funcName == '|') {
+        return tree.parameters.map(outputJS).map(it => `(${it})`).join(' || ')
+      }
+      if (tree.funcName == '&') {
+        return tree.parameters.map(outputJS).map(it => `(${it})`).join(' && ')
+      }
+      if (tree.funcName == '!') {
+        return `!(${tree.parameters.map(outputJS)[0]})`
+      }
+    } else {
+      return String(tree)
+    }
+  }
+  // 输出lisp语法的代码
+  function outputLisp(tree) {
+    if (typeof tree == 'object') {
+      var paras = tree.parameters.map(outputLisp)
+      return `(${tree.funcName} ${paras.join(' ')})`
+    } else {
+      return String(tree)
+    }
+
+  }
+
+</script>
