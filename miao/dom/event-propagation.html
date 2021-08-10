@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <p>
+      Lorem ipsum dolor sit amet. <button>BUTTON</button> Lorem ipsum dolor sit amet.
+    </p>
+  </div>
+
+  <script>
+    var btn = document.querySelector('button')
+    var p = document.querySelector('p')
+
+    btn.addEventListener('mousedown', e => {
+      console.log('btn')
+      if (e.which == 3) {
+        e.stopImmediatePropagation()
+      }
+    })
+    // btn.addEventListener('mousedown', e => {
+    //   console.log(2)
+    // })
+
+
+    p.addEventListener('mousedown', e => {
+      console.log(3)
+    })
+    // p.addEventListener('mousedown', e => {
+    //   console.log(4)
+    // })
+  </script>
+</body>
+</html>

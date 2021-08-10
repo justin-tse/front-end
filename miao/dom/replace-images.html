@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    pre + pre {
+      color: red;
+    }
+    a {
+      border: 2px solid;
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+  <PRE   style="color: red;foo: 8;font-family: consolas;"    data-language="javascript">
+    function isPrime(n) {
+      for (var i = 2; i < n; i++) {
+        <code>if</code> (n % i == 0) {
+          return false
+        }
+      }
+      return true
+    }
+  </PRE>
+  <pre data-language="python">
+    def isPrime(n):
+      i = 2
+      while (i < n):
+        if n % i == 0:
+          return False
+      return True
+
+  </pre>
+  <script>
+    var syntax = {
+      javascript: /function|var|if|for|return/g,
+      python: /def|:|True|False/g,
+    }
+  </script>
+
+
+  <input type="text" value="333">
+  <label data-foo-bar="8" data-bar="abcd" for="xxxx">afowiejf</label>
+  <p id="p1" foo="bar" class="a b  c">
+    <span style="border: 2px solid red;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam suscipit, necessitatibus porro ea nobis asperiores? Laboriosam adipisci et, non veritatis velit necessitatibus cum placeat consequuntur repellendus sunt accusantium id dolorum.</span>
+    The
+    <img src="img/cat.png" alt="Cat" width="50" height="50">
+    in the
+    <img src="img/hat.png" alt="Hat">
+    playing the
+    <img src="img/ball.png" alt="Ball">
+  </p>
+
+
+    <p><button onclick =" replaceImages ()"> Replace </button></p>
+  <script>
+    function replaceImages() {
+      var p = document.getElementsByTagName('p')[0]
+      var imgs = document.getElementsByTagName('img')
+
+      for (var i = imgs.length - 1; i >= 0; i--) {
+        var img = imgs[i]
+        var textNode = document.createTextNode(img.alt)
+        p.replaceChild(textNode, img)
+      }
+    }
+  </script>
+</body>
+</html>

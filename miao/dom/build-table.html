@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    function buildTable(objs) {
+      var uniqueKeys = Array.from(new Set([].concat(...objs.map(Object.keys))))
+      var table = document.createElement('table')
+      table.border = 1
+      var tableHeadRow = document.createElement('tr')
+      table.append(tableHeadRow)
+
+      for (var i = 0; i < uniqueKeys.length; i++) {
+        var tableHeadCell = document.createElement('th')
+        tableHeadCell.textContent = uniqueKeys[i]
+        tableHeadRow.append(tableHeadCell)
+      }
+
+      for (var obj of objs) {
+        var tr = document.createElement('tr')
+        table.append(tr)
+        for (var key of uniqueKeys) {
+          var td = document.createElement('td')
+          if (obj.hasOwnProperty(key)) {
+            td.textContent = obj[key]
+            if (typeof obj[key] == 'number') {
+              td.style.textAlign = 'right'
+            }
+          }
+          tr.append(td)
+        }
+      }
+
+      return table
+    }
+  </script>
+</body>
+</html>

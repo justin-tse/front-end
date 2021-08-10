@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <a href="https://www.baidu.com" onclick="event.preventDefault()">baidu</a>
+  <ul onclick="foo()">
+    <li>a</li>
+    <li>b</li>
+    <li>c</li>
+  </ul>
+  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Impedit, iste temporibus ea, magnam recusandae facilis animi voluptate quisquam non quae necessitatibus nostrum officia tenetur optio. At ad quia molestiae itaque.
+  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Fugiat amet tempore earum hic, iste laudantium modi fuga enim porro eos non reprehenderit ducimus, ad quibusdam autem sint? Magni, dolorem dolore?
+  <script>
+    var lis = document.querySelectorAll('li')
+    var ul = document.querySelector('ul')
+
+
+    // for (let i = 0; i < lis.length; i++) {
+
+    //     var li = lis[i]
+    //     li.addEventListener('click', e => {
+    //       console.log(i)
+    //     })
+
+    // }
+
+    // for (var i = 0; i < lis.length; i++) {
+    //   (function(i) {
+    //     var li = lis[i]
+    //     li.addEventListener('click', e => {
+    //       console.log(i)
+    //     })
+    //   })(i) // IIFE
+    // }
+
+    ul.addEventListener('click', function(e) {
+      console.log(e)
+      console.log(Array.from(ul.children).indexOf(e.target) + 1)
+    })
+
+  </script>
+</body>
+</html>

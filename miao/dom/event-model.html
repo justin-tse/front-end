@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <section>
+      <p>Lorem ipsum dolor <button>BUTTON</button> sit amet consectetur adipisicing elit. Voluptatum aut adipisci deleniti quasi perspiciatis, esse vel voluptas ducimus blanditiis quis ea vitae, eos distinctio ex reiciendis consequatur recusandae. Praesentium, temporibus.</p>
+    </section>
+  </div>
+
+  <script>
+    var p = document.querySelector('p')
+    var section = document.querySelector('section')
+    var div = document.querySelector('div')
+    var button = document.querySelector('button')
+
+    button.addEventListener('click', e => {
+      console.log('button click')
+    })
+
+    div.addEventListener('click', e => {
+      console.log(1)
+      e.foooo = 88888
+    }, true) // true 表示捕获阶段
+    div.addEventListener('click', e => {
+      console.log(2)
+    })
+
+    section.addEventListener('click', e => {
+      console.log(3)
+      e.stopPropagation()
+      console.log(e)
+    }, true) // true 表示捕获阶段
+    section.addEventListener('click', e => {
+      console.log(333)
+      // e.stopPropagation()
+    }, true) // true 表示捕获阶段
+    section.addEventListener('click', e => {
+      console.log(4)
+    })
+
+    p.addEventListener('click', e => {
+      console.log(6)
+    })
+    p.addEventListener('click', e => {
+
+      console.log(5)
+    }, true) // true 表示捕获阶段
+    p.addEventListener('click', e => {
+      console.log(6)
+    })
+    p.addEventListener('click', e => {
+
+      console.log(5)
+    }, true) // true 表示捕获阶段
+
+  </script>
+</body>
+</html>

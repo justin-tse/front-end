@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+<button onclick="foo(event)">aaaa</button>
+
+<p>bbbb</p>
+
+
+<script>
+  // debugger
+  var btn = document.querySelector('button')
+  var p = document.querySelector('p')
+
+  function foo(event) {
+    debugger
+    console.log(event, this)
+  }
+
+  // btn.addEventListener('click', foo)
+  // p.addEventListener('click', foo)
+  // addEventListener('click', foo)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // btn.onclick = function() {
+  //   console.log(1);
+  //   console.log(innerHTML)
+  // }
+
+  // btn.onclick = foo
+
+  // btn.onclick()
+
+  // btn.addEventListener('click', function() {
+  //   console.log('btn clicked a ')
+  // })
+  // btn.addEventListener('click', function() {
+  //   console.log('btn clicked b ')
+  // })
+  // function foo() {
+  //   console.log(2)
+  // }
+
+
+
+  // btn.addEventListener('click', function() {
+  //   console.log('aaa clickaaaa')
+  // })
+
+  // btn.addEventListener('click', function() {
+  //   console.log('aaa click3333' )
+  // })
+
+  // btn.addEventListener('click', function() {
+  //   console.log('aaa click5555')
+  // })
+</script>
+</body>
+</html>
