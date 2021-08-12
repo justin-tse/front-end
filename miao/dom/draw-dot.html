@@ -21,45 +21,113 @@
   </style>
 </head>
 <body>
-  <svg width=500 height="500"></svg>
+  <svg width="100%" height="500"></svg>
 
-  <input type="color" id="colorInput">
+  <br>
+
+  工具：<button onclick=" tool='line' ">乙</button><button onclick=" tool='circle' ">〇</button>
+  颜色：<input type="color" id="colorInput">
+  线条粗线：<input type="range" min="1" max="10" value="2" id="widthInput">
+  <span class="line-width-value">2</span>
 
   <script>
     var draw = false
     var svg = document.querySelector('svg')
+    var tool = 'line'
 
     var lastpos = null
 
     document.addEventListener('mousedown', function(e) {
-      function drawDot(e) {
+      if (tool == 'line') {
+
         var pos = mousePos(svg)
+        var polyline = document.createElementNS("http://www.w3.org/2000/svg", 'polyline')
 
-        var line = document.createElementNS("http://www.w3.org/2000/svg", 'line')
+        polyline.setAttribute('fill', 'none')
+        polyline.setAttribute('stroke', colorInput.value)
+        polyline.setAttribute('stroke-width', widthInput.value)
+        polyline.setAttribute('stroke-linecap', 'round')
+        polyline.setAttribute('stroke-linejoin', 'round')
 
-        if (lastpos == null) {
-          line.setAttribute('x1', pos.x)
-          line.setAttribute('y1', pos.y)
-        } else {
-          line.setAttribute('x1', lastpos.x)
-          line.setAttribute('y1', lastpos.y)
+        svg.append(polyline)
+        var points = `${pos.x} ${pos.y} `
+        polyline.setAttribute('points', points)
+
+        function drawDot(e) {
+          var pos = mousePos(svg)
+          var line = document.createElementNS("http://www.w3.org/2000/svg", 'line')
+          points += `${pos.x} ${pos.y} `
+          polyline.setAttribute('points', points)
+
+          // if (lastpos == null) {
+          //   line.setAttribute('x1', pos.x)
+          //   line.setAttribute('y1', pos.y)
+          // } else {
+          //   line.setAttribute('x1', lastpos.x)
+          //   line.setAttribute('y1', lastpos.y)
+          // }
+
+          // line.setAttribute('x2', pos.x)
+          // line.setAttribute('y2', pos.y)
+          // line.setAttribute('stroke', colorInput.value)
+          // line.setAttribute('stroke-width', widthInput.value)
+          // line.setAttribute('stroke-linecap', 'round')
+
+          // lastpos = pos
+
+          // svg.append(line)
         }
-
-        line.setAttribute('x2', pos.x)
-        line.setAttribute('y2', pos.y)
-        line.setAttribute('stroke', colorInput.value)
-        line.setAttribute('stroke-width', '2')
-
-        lastpos = pos
-
-        svg.append(line)
+        document.addEventListener('mousemove', drawDot)
+        document.addEventListener('mouseup', function once() {
+          lastpos = null
+          document.removeEventListener('mouseup', once)
+          document.removeEventListener('mousemove', drawDot)
+        })
       }
-      document.addEventListener('mousemove', drawDot)
-      document.addEventListener('mouseup', function once() {
-        lastpos = null
-        document.removeEventListener('mouseup', once)
-        document.removeEventListener('mousemove', drawDot)
-      })
+
+      if (tool == 'circle') {
+        var ellipse = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse')
+        svg.append(ellipse)
+        ellipse.setAttribute('stroke', colorInput.value)
+        ellipse.setAttribute('stroke-width', widthInput.value)
+        ellipse.setAttribute('fill', 'none')
+
+        var startPos = mousePos(svg)
+
+        function drawEllipse() {
+          var currPos = mousePos(svg)
+          var cx = (startPos.x + currPos.x) / 2
+          var cy = (startPos.y + currPos.y) / 2
+          ellipse.setAttribute('cx', cx)
+          ellipse.setAttribute('cy', cy)
+          var rx = Math.abs(startPos.x - currPos.x) / 2
+          var ry = Math.abs(startPos.y - currPos.y) / 2
+          ellipse.setAttribute('rx', rx)
+          ellipse.setAttribute('ry', ry)
+
+        }
+        document.addEventListener('mousemove', drawEllipse)
+        document.addEventListener('mouseup', function once() {
+          document.removeEventListener('mouseup', once)
+          document.removeEventListener('mousemove', drawEllipse)
+        })
+      }
+    })
+
+    document.addEventListener('keydown', function(e) {
+      // console.log(e)
+      if (e.ctrlKey && e.key == 'z') {
+        if (svg.lastElementChild) {
+          svg.removeChild(svg.lastElementChild)
+        }
+      }
+    })
+
+    var widthInput = document.querySelector('#widthInput')
+    var widthSpan = document.querySelector('.line-width-value')
+
+    widthInput.addEventListener('input', e => {
+      widthSpan.textContent = widthInput.value
     })
 
     // d3.js里的一个函数
