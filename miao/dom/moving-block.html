@@ -18,7 +18,18 @@
 
   <div style="top: 50px; left: 50px;"></div>
 
-  <script>
+</body>
+</html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 在dom解析完成的时候触发
+
+  })
+  // 在页面中所有资源（图片，字体等）加载完成的时候触发
+  // window.onload = function() {
+
+
     'use strict'
     var div = document.querySelector('div')
     var vx = 0
@@ -27,7 +38,7 @@
     var rightPress = false
     var upPress = false
     var downPress = false
-console.log(div)
+
 
     document.addEventListener('keydown', function(e) {
       console.log(e)
@@ -84,19 +95,36 @@ console.log(div)
       }
     })
 
+    window.addEventListener('blur', function(e) {
+      vx = 0
+      vy = 0
+    })
+
+    // var hasFocus = true
+
+    // window.addEventListener('blur', () => {
+    //   hasFocus = false
+    // })
+    // window.addEventListener('focus', () => {
+    //   hasFocus = true
+    //   requestAnimationFrame(move)
+    // })
+
     var lastTime = 0
-    requestAnimationFrame(function move(time) {
+    function move(time) {
       var timeDiff = time - lastTime
       lastTime = time
 
       div.style.left = parseFloat(div.style.left) + vx * timeDiff * 0.2 + 'px'
       div.style.top = parseFloat(div.style.top) + vy * timeDiff * 0.2 + 'px'
 
-      requestAnimationFrame(move)
-    })
+      // if (hasFocus) {
+        requestAnimationFrame(move)
+      // }
+    }
+    requestAnimationFrame(move)
 
     document.addEventListener('keypress', console.log)
 
-  </script>
-</body>
-</html>
+  // }
+</script>
