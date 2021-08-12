@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .dragable {
+      width: 100px;
+      height: 100px;
+      background-color: pink;
+      position: fixed;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="dragable"  style="left: 20px; top: 20px; background: pink"></div>
+  <div class="dragable"  style="left: 30px; top: 30px; background: violet"></div>
+  <div class="dragable"  style="left: 40px; top: 40px; background: aqua"></div>
+
+  <script>
+    // var dragable = document.querySelector('.dragable')
+    var maxZindex = 4
+    document.addEventListener('mousedown', function(e) {
+      if (!e.target.classList.contains('dragable')) {
+        return
+      }
+
+      var startx = e.clientX
+      var starty = e.clientY
+      var el = e.target
+      el.style.zIndex = maxZindex++
+      var elStartx = parseFloat(el.style.left)
+      var elStarty = parseFloat(el.style.top)
+
+      window.addEventListener('mousemove', function move(ev) {
+        if (ev.which === 0 || ev.buttons === 0) {
+          window.removeEventListener('mousemove', move)
+          console.log('remove mousemove')
+          return
+        }
+        var curx = ev.clientX
+        var cury = ev.clientY
+        var dx = curx - startx
+        var dy = cury - starty
+
+        var left = elStartx + dx
+        var top = elStarty + dy
+
+        if (left < 50) {
+          left = 0
+        }
+        if (left > window.innerWidth - el.offsetWidth - 50) {
+          left = window.innerWidth - el.offsetWidth
+        }
+
+        if (top < 50) {
+          top = 0
+        }
+        if (top > window.innerHeight - el.offsetHeight - 50) {
+          top = window.innerHeight - el.offsetHeight
+        }
+
+        el.style.left = left + 'px'
+        el.style.top = top + 'px'
+
+      })
+    })
+  </script>
+</body>
+</html>
