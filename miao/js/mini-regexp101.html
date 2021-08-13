@@ -93,6 +93,33 @@
     </section>
     <!-- <marquee onmouseover="stop()" onmouseout="start()" behavior="" direction=""> sdfj lsdf </marquee> -->
   </div>
+  <script id="worker">
+    addEventListener('message', e => {
+      var re = e.data.re
+      var str = e.data.str
+      var matches = []
+      var match = null
+
+      while (match = re.exec(str)) {
+        matches.push(match)
+        if (match[0] == '') {
+          re.lastIndex++
+        }
+        if (!re.global) {
+          break
+        }
+      }
+
+      postMessage(matches)
+    })
+
+    function startWorker(f) {
+      var source = '(' + f.toString() + ')()'
+      var blob = new Blob([source], {type: 'application/javascript'})
+      var url = URL.createObjectURL(blob)
+      return new Worker(url)
+    }
+  </script>
   <script>
 
     function syncScrollPos() {
@@ -121,6 +148,25 @@
       console.log(re)
       var str = strInput.value
       console.log(str)
+      /**
+       * var worker = startWorker(function() {})
+       * var success = false
+       * worker.addEventListener('message', e => {
+       *   success = true
+       *   var matches = e.data
+       *
+       *   拼html字符串
+       *   显示到页面上
+       * })
+       * worker.postMessage({re: re, str: str})
+       * setTimeout(() => {
+       *   if (!success) {
+       *     显示匹配超时
+       *     worker.terminate()
+       *   }
+       * }, 2000)
+       *
+       */
       var match
       if (re.global) {
         var resultHTML = ''
