@@ -12,11 +12,38 @@
     <div data-tabname="Link">Consequuntur, eaque iure ipsa aliquid pariatur eum fuga enim incidunt! Nostrum excepturi voluptatum quaerat iure culpa quo quam consectetur reiciendis ullam iste, labore hic saepe accusantium sit sapiente quidem fuga.</div>
     <div data-tabname="About">Animi itaque reiciendis modi voluptatem doloremque. Sit consequuntur porro quisquam sunt in? Dolor consequatur qui ab iure autem amet, vero itaque quod quibusdam, minus voluptas atque neque odit sequi repellat?</div>
   </div>
+  <div>
+    <div data-tabname="AAAAA">Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique neque, doloremque voluptates nulla id tempore debitis molestiae atque laborum? Veritatis obcaecati tenetur, dolor nobis ut placeat quo necessitatibus repellendus tempore!</div>
+    <div data-tabname="BBBBBB">Consequuntur, eaque iure ipsa aliquid pariatur eum fuga enim incidunt! Nostrum excepturi voluptatum quaerat iure culpa quo quam consectetur reiciendis ullam iste, labore hic saepe accusantium sit sapiente quidem fuga.</div>
+    <div data-tabname="CCCCCCCC">Animi itaque reiciendis modi voluptatem doloremque. Sit consequuntur porro quisquam sunt in? Dolor consequatur qui ab iure autem amet, vero itaque quod quibusdam, minus voluptas atque neque odit sequi repellat?</div>
+  </div>
 
   <script>
     function asTabs(node) {
+      let children = Array.from(node.children)
+      var buttons = []
 
+      for (let child of children.reverse()) {
+        let button = document.createElement('button')
+        buttons.push(button)
+
+        button.textContent = child.dataset.tabname
+        child.style.display = 'none'
+
+        button.addEventListener('click', function(e) {
+          children.forEach(it => it.style.display = 'none')
+          child.style.display = 'block'
+          buttons.forEach(it => it.style.background = '')
+          button.style.background = 'pink'
+        })
+
+        node.prepend(button)
+      }
+      node.firstElementChild.click()
     }
+
+    asTabs(document.querySelector('body > div'))
+    asTabs(document.querySelectorAll('body > div')[1]  )
   </script>
 </body>
 </html>
