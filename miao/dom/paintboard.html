@@ -39,7 +39,8 @@
 
     var lastpos = null
 
-    document.addEventListener('mousedown', function(e) {
+    svg.addEventListener('mousedown', function(e) {
+      drawandnosave = true
       if (tool == 'line') {
 
         var pos = mousePos(svg)
@@ -142,7 +143,16 @@
       }
     }
 
+    var drawandnosave = false
+
+    window.addEventListener('beforeunload', e => {
+      if (drawandnosave) {
+        return e.returnValue = '还未保存，是否要退出?'
+      }
+    })
+
     function save() {
+      drawandnosave = false
       var svgSource = svg.outerHTML
       var blob = new Blob(['<?xml version="1.0" encoding="utf-8"?>', svgSource], {type: 'image/xml+svg'})
       var url = URL.createObjectURL(blob)
