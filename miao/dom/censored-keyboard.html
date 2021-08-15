@@ -1,0 +1,51 @@
+<textarea name="" id="" cols="30" rows="10"></textarea>
+
+<script>
+  var textarea = document.querySelector('textarea')
+  textarea.addEventListener('keydown', e => {
+    if (e.key == 'Q' || e.key == 'W' || e.key == 'X') {
+      e.preventDefault()
+    }
+  })
+
+  textarea.addEventListener('paste', e => {
+    // e.preventDefault()
+    console.log(e,  e.clipboardData.files)
+
+    var text = e.clipboardData.getData('text')
+    var text = text.replace(/[QWX]/g, '*')
+
+    var start = textarea.selectionStart
+    var end = textarea.selectionEnd
+    var value = textarea.value
+
+    textarea.value = value.slice(0, start) + text + value.slice(end)
+    textarea.selectionStart = textarea.selectionEnd = (value.slice(0, start) + text).length
+
+    e.preventDefault()
+  })
+
+  textarea.addEventListener('drop', e => {
+    e.preventDefault()
+  })
+
+  textarea.addEventListener('input', e => {
+    console.log(e)
+    var text = e.data.replace(/[QWX]/g, '*')
+
+  })
+
+  // textarea的原型上的value属性的属性描述符
+  var prevValue = Object.getOwnPropertyDescriptor(textarea.__proto__, 'value')
+
+  // console.log(prevValue)
+
+  Object.defineProperty(textarea, 'value', {
+    get: function() {
+      return prevValue.get.call(this)
+    },
+    set: function(val) {
+      return prevValue.set.call(this, val.replace(/[QWX]/g, '*'))
+    }
+  })
+</script>
