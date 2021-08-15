@@ -1,0 +1,63 @@
+<style>
+  span.mouse-shadow {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    position: fixed;
+    background-color: red;
+  }
+</style>
+
+<script>
+  var i = 0
+  addEventListener('mousemove', e => {
+    i++
+    if (i % 2) {
+      return
+    }
+    console.log('move')
+    var span = document.createElement('span')
+    span.classList.add('mouse-shadow')
+
+    span.style.left = e.clientX + 'px'
+    span.style.top = e.clientY + 'px'
+
+    document.body.append(span)
+
+    setTimeout(() => {
+      document.body.removeChild(span)
+    }, 16 * 8)
+  })
+
+  // var x = -999
+  // var y = -999
+  // addEventListener('mousemove', e => {
+  //   x = e.clientX
+  //   y = e.clientY
+  // })
+
+  // var stack = []
+  // function getSpan() {
+  //   if (stack.length) {
+  //     return stack.pop()
+  //   } else {
+  //     return document.createElement('span')
+  //   }
+  // }
+  // requestAnimationFrame(function ani() {
+  //   var span = document.createElement('span')
+  //   span.classList.add('mouse-shadow')
+
+  //   span.style.left = x + 'px'
+  //   span.style.top = y + 'px'
+
+  //   document.body.append(span)
+
+  //   setTimeout(() => {
+  //     document.body.removeChild(span)
+  //     // stack.push(span)
+  //   }, 16 * 8)
+
+  //   requestAnimationFrame(ani)
+  // })
+</script>
