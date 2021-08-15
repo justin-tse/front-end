@@ -1,0 +1,53 @@
+<input type="text">
+<span></span>
+<script>
+  var input = document.querySelector('input')
+  var span = document.querySelector('span')
+  // var id
+
+  // input.addEventListener('input', e => {
+  //   clearTimeout(id)
+  //   id = setTimeout(() => {
+  //     span.textContent = '显示联想' + Math.random()
+  //   }, 1000)
+  // })
+
+  input.addEventListener('input',
+    throttle(function() {
+      span.textContent = '显示联想' + Math.random()
+    }, 500)
+  )
+
+  function debounce(f, duration) {
+    var id
+    var latestArgs
+    var latestThis
+    return function(...args) {
+      latestArgs = args
+      latestThis = this
+      clearTimeout(id)
+      id = setTimeout(() => {
+        f.call(latestThis, ...latestArgs)
+      }, duration)
+    }
+  }
+
+  function throttle(f, duration) {
+    var lastRuntime = 0
+    var id
+
+    return function(...args) {
+      if (Date.now() - lastRuntime > duration) {
+        f.call(this, ...args)
+        lastRuntime = Date.now()
+      } else {
+        clearTimeout(id)
+        id = setTimeout(() => {
+          f.call(this, ...args)
+          lastRuntime = Date.now()
+        }, duration)
+      }
+    }
+  }
+
+</script>

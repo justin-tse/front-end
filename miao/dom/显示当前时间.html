@@ -1,0 +1,14 @@
+<span id="curTime"></span>
+<script>
+  var msToNextSec = 1000 - Date.now() % 1000
+
+  setTimeout(() => {
+    setTimeout(function tick() {
+      curTime.textContent = new Date().getTime()
+      setTimeout(tick, 1000)
+    }, 1000)
+    curTime.textContent = new Date().getTime()
+
+  }, msToNextSec)
+  curTime.textContent = new Date().getTime()
+</script>
