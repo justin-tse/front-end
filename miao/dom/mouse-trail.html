@@ -1,0 +1,38 @@
+<style>
+  div {
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    position: fixed;
+  }
+</style>
+
+<div style="left: 0; top: 0;"></div>
+<div style="left: 0; top: 0;"></div>
+<div style="left: 0; top: 0;"></div>
+<div style="left: 0; top: 0;"></div>
+<div style="left: 0; top: 0;"></div>
+
+<script>
+  var fires = document.querySelectorAll('div')
+  var mx = -9990
+  var my = -9990
+
+  window.addEventListener('mousemove', e => {
+    mx = e.clientX
+    my = e.clientY
+  })
+
+  requestAnimationFrame(function ani(time) {
+    var angle = time * 0.01
+
+    for (var fire of fires) {
+      fire.style.left = Math.cos(angle) * 150 + mx + 'px'
+      fire.style.top = Math.sin(angle) * 150 + my + 'px'
+
+      angle += Math.PI * 2 / fires.length
+    }
+
+    requestAnimationFrame(ani)
+  })
+</script>

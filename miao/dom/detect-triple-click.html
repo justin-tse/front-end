@@ -1,0 +1,107 @@
+<div>
+
+</div>
+
+<section>
+
+</section>
+
+<script>
+  // var last1 = 0
+  // var last2 = 0
+  // var last3 = 0
+
+  // window.addEventListener('click', e => {
+  //   console.log('click')
+  //   var time = Date.now()
+
+  //   if (time - last2 < 400 && last2 - last1 > 400) {
+  //     console.log('triple click')
+  //   }
+
+  //   last1 = last2
+  //   last2 = last3
+  //   last3 = time
+  // })
+
+
+
+
+
+  // var last = 0
+  // var c = 1
+  // var id
+
+  // window.addEventListener('click', e => {
+  //   console.log('click')
+  //   var time = Date.now()
+
+  //   clearTimeout(id)
+  //   id = setTimeout(() => {
+  //     c = 1
+  //   }, 200)
+
+  //   if (time - last < 200) {
+  //     c++
+  //   }
+  //   if (c == 2) {
+  //     console.log('double click')
+  //   }
+  //   if (c == 3) {
+  //     console.log('triple click')
+  //   }
+  //   if (c == 4) {
+  //     console.log('quda click')
+  //   }
+  //   if (c == 5) {
+  //     console.log('5 click')
+  //   }
+  //   if (c == 6) {
+  //     console.log('6 click')
+  //   }
+
+
+
+  //   last =  time
+  // })
+
+
+  // var dblChecked = false
+  // window.addEventListener('dblclick', e => {
+  //   dblChecked = true
+  //   setTimeout(() => {
+  //     dblChecked = false
+  //   },200)
+  // })
+  // window.addEventListener('click', e => {
+  //   console.log('click')
+  //   if (dblChecked) {
+  //     console.log('triple click')
+  //   }
+  // })
+
+  // window.addEventListener('click', e => {
+  //   console.log(e.detail, e)
+  // })
+
+
+
+  var last = 0
+  var c = 1
+
+  window.addEventListener('click', e => {
+    // console.log('click')
+    var time = Date.now()
+
+    if (time - last < 200) {
+      c++
+    } else {
+      c = 1
+    }
+
+    console.log(c)
+
+    last =  time
+  })
+
+</script>
