@@ -21,7 +21,10 @@
   </style>
 </head>
 <body>
-  <svg width="800px" height="500px" version="1.1" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+
+  <div id="svgContainer">
+    <svg width="800px" height="500px" version="1.1" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+  </div>
 
   <br>
 
@@ -31,6 +34,8 @@
   <span class="line-width-value">2</span>
 
   <button onclick="save()">保存</button>
+  <button onclick="openFile()">打开</button>
+  <input type="file" id="fileInput" accept=".svg" hidden>
 
   <script>
     var draw = false
@@ -39,7 +44,10 @@
 
     var lastpos = null
 
-    svg.addEventListener('mousedown', function(e) {
+    svgContainer.addEventListener('mousedown', function(e) {
+      if (!svg.contains(e.target)) {
+        return
+      }
       drawandnosave = true
       if (tool == 'line') {
 
@@ -162,6 +170,31 @@
       anchor.click()
       // el.focus()  el.blur()
     }
+
+    function openFile() {
+
+      if (drawandnosave) {
+        var answer = confirm('当前绘画未保存，确定要打开新文件吗？')
+        if (answer == false) {
+          return
+        }
+      }
+
+      fileInput.click()
+    }
+
+    fileInput.addEventListener('change', e => {
+      var svgFile = fileInput.files[0]
+      var fr = new FileReader()
+      fr.addEventListener('load', () => {
+        var svgFileContent = fr.result
+        svgContainer.innerHTML = svgFileContent
+        window.svg = svgContainer.querySelector('svg')
+      })
+      fr.readAsText(svgFile)
+    })
+
+
   </script>
 </body>
 </html>
