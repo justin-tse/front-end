@@ -1,0 +1,46 @@
+<input type="text" autofocus>
+
+<input type="file" multiple name="" id="">
+
+<label>
+  <input type="checkbox">a aaa
+</label>
+
+<form>
+  <input type="checkbox">
+  <input type="radio" name="gender" value="male">
+  <input type="radio" name="gender" value="female">
+  <input type="radio" name="gender" value="gay">
+
+  <p xdraggable="true">asdfwef</p>
+  <p xdraggable="true">asdfwefsdfwef</p>
+
+  <select name="aaa" id="aaa" multiple size="5">
+    <option value="aaaa">aaa</option>
+    <option >bbb</option>
+    <option value="1">ccc</option>
+    <option value="2">cxc</option>
+    <option value="3">cec</option>
+  </select>
+  <input type="checkbox" name="" id=""> aaa
+  <input type="checkbox" name="" id=""> bbb
+  <input type="checkbox" name="" id=""> ccc
+  <input type="checkbox" name="" id=""> cx
+  <input type="checkbox" name="" id=""> cec
+</form>
+<script>
+  window.onload = function () {
+    if (document.activeElement == document.body) {
+      document.querySelector('input').focus()
+    }
+  }
+</script>
+<script>
+  var buttons = document.getElementsByName("color");
+
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener("change", function setColor(event) {
+      document.body.style.background = this.value;
+    });
+  }
+</script>
