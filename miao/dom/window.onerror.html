@@ -1,0 +1,19 @@
+<script>
+  // 用来做错误上报
+  // window.onerror 不太合适叫事件，因为函数接收不只一个参数
+  // 更合适叫hook函数/钩子函数
+  var prevOnerror = typeof window.onerror == 'function' ? window.onerror : function(){}
+  window.onerror = function(errmsg, filename, row, col, error) {
+    prevOnerror()
+    send(arguments, 'https://myserver.com/error-report')
+  }
+
+  window.addEventListener('error', function(e) {
+
+  })
+
+
+</script>
+<script>
+  2()
+</script>
