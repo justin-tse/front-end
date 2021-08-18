@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <ul>
+      <li><img id="i1" src="https://travel.12306.cn/imgs/resources/uploadfiles/images/fcd7173f-7651-46e7-a126-bdc199e1f6f7_product_W572_H370.jpg" alt=""></li>
+      <li><img id="i2" src="https://travel.12306.cn/imgs/resources/uploadfiles/images/243945e6-c45d-4870-9cf5-77e488068646_product_W572_H370.jpg" alt=""></li>
+      <li><img id="i3" src="https://travel.12306.cn/imgs/resources/uploadfiles/images/b0c76b21-531b-4af4-a607-cf5672c72ded_product_W572_H370.jpg" alt=""></li>
+      <li><img id="i4" src="https://travel.12306.cn/imgs/resources/uploadfiles/images/8b36f9a7-f780-4e71-b719-9300109a9ff2_product_W572_H370.jpg" alt=""></li>
+    </ul>
+  </div>
+
+  <div id="popup">
+    <span onclick="history.back()">&times;</span>
+    <img src="https://travel.12306.cn/imgs/resources/uploadfiles/images/b0c76b21-531b-4af4-a607-cf5672c72ded_product_W572_H370.jpg" alt="">
+  </div>
+
+  <style>
+    #popup img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #popup {
+      display: none;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-color: rgba(255,255,255,0.7);
+    }
+  </style>
+  <script>
+    var ul = document.querySelector('ul')
+    var popup = document.querySelector('#popup')
+    var popupImg = document.querySelector('#popup img')
+
+    ul.addEventListener('click', function(e) {
+      if (e.target.tagName == 'IMG') {
+        var img = e.target
+
+        popup.style.display = 'block'
+        popupImg.src = img.src
+        history.pushState({imgId: img.id}, null, location.href + '/' + img.id)
+        // location.hash = '/' + img.id
+      }
+    })
+
+    // 用户点击后退时，后退或前进到了由pushState打开的地址时，触发
+    window.addEventListener('popstate', e => {
+    // window.addEventListener('hashchange', e => {
+      // 回到了列表页
+      if (location.href.endsWith('push-state.html')) {
+        popup.style.display = 'none'
+      } else {
+        var imgId = history.state.imgId
+        // var imgId = location.hash.slice(2)
+        var imgSrc = document.getElementById(imgId).src
+        popupImg.src = imgSrc
+        popup.style.display = 'block'
+      }
+    })
+
+    window.dispatchEvent(new Event('hashchange'))
+  </script>
+</body>
+</html>
