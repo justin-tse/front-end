@@ -1,0 +1,58 @@
+<pre draggable="true">aaaaa</pre>
+<style>
+  pre {
+    border:5px solid grey;
+    height: 100px;
+  }
+</style>
+
+<script>
+  var pre = document.querySelector('pre')
+
+  // // 拖拽松手的时候
+  // pre.addEventListener('drop', function(e) {
+  //   console.log('drop')
+
+  //   console.log(e.dataTransfer.files)
+
+  //   e.preventDefault()
+  // })
+
+
+  // pre.addEventListener('dragover', function(e) {
+  //   console.log('dragover')
+  //   e.preventDefault() // 防止浏览器打开拖拽进来的文件
+  // })
+  // pre.addEventListener('dragenter', function(e) {
+  //   console.log('dragenter')
+  //   e.preventDefault()
+  //   pre.textContent = '松开鼠标'
+
+  // })
+  // pre.addEventListener('dragleave', function(e) {
+  //   console.log('dragleave')
+
+  //   pre.textContent = '拖动到这里'
+  //   e.preventDefault()
+  // })
+
+
+  // 以上代码是外面的东西往里面拖
+
+
+
+  pre.addEventListener('dragstart', function(e) {
+    console.log('dragstart')
+    console.log(e.dataTransfer)
+    var blob = new Blob(['aaaaa'], {type:'text/plain'})
+    e.dataTransfer.setData('text/plain', blob)
+
+    // e.preventDefault()
+
+  })
+  pre.addEventListener('dragend', function(e) {
+    console.log('dragend')
+    e.dataTransfer.setData('text/plain', 'foooo')
+    // e.preventDefault()
+  })
+</script>
