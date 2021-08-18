@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <input type="text">
+  <ul></ul>
+  <script>
+    var input = document.querySelector('input')
+    var ul = document.querySelector('ul')
+    var currentShowStartTime = 0 // 当前展示的联想内容的发起时间
+
+    input.addEventListener(
+      'input',
+      debounce(e => {
+        var startTime = Date.now()
+
+        // 发求请求数据
+        getSuggest(e.target.value, (suggests) => {
+          if (currentShowStartTime > startTime) {
+            return
+          }
+          currentShowStartTime = startTime
+          ul.innerHTML = ''
+          suggests.forEach(suggest => {
+            var li = document.createElement('li')
+            li.textContent = suggest
+            ul.append(li)
+          })
+        })
+
+      }, 200)
+    )
+
+    function getSuggest(word, callback) {
+      console.log('start get suggest')
+      var suggests = Array(10).fill(0).map((a, i) => {
+        return word + i
+      })
+      setTimeout(() => {
+        callback(suggests)
+      }, 1000 + 2000 * Math.random())
+    }
+
+
+
+
+
+    function debounce(f, duration) {
+      var id
+      var latestArgs
+      var latestThis
+      var latestReturnValue
+      return function(...args) {
+        latestArgs = args
+        latestThis = this
+        clearTimeout(id)
+        id = setTimeout(() => {
+          latestReturnValue = f.call(latestThis, ...latestArgs)
+        }, duration)
+        return latestReturnValue
+      }
+    }
+  </script>
+</body>
+</html>
