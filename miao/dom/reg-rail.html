@@ -1,0 +1,627 @@
+<svg width="8000px" height="8000px"></svg>
+<script>
+  // var char = {
+  //   type: 'Char',
+  //   val: 'c',
+  //   ascii: 99,
+  //   startIdx:
+  //   endIdx:
+  //   raw: ,
+  // }
+
+  // // [abc]
+  // var charclass = {
+  //   type:'CharClass',
+  //   elements: [char,char,char,char,char]
+  // }
+
+  // var repeat = {
+  //   type: 'Repeat',
+  //   element: obj,
+  //   max: 5,
+  //   min: 3,
+  // }
+
+  // var captureGroup = {
+  //   type: 'CaptureGroup',
+  //   assertion: true/false,
+  //   index: 分组编号,
+  //   name: 分组名字,
+  //   branches: [branch, [字符 字符 字符], branch]
+  // }
+
+  // var branch = {
+  //   type: 'Branch',
+  //   elements: [node, node, node, node, node]
+  // }           /a[1234](abc)x*d|abc/
+
+
+
+  // fcall = {
+  //   type: 'fcall',
+  //   name: 'a',
+  //   args: [1, {type: 'fcall', name: 'b', args: [1,2]}, ]
+  // }
+
+  // a(1, b(1, 2))
+
+  var str = 'abc|def?'
+  var i = 0
+  var groupIndex = 1
+
+  function parseCharacter() {
+    var node = {
+      type: 'Character',
+      start: i,
+      end: 0,
+      raw: '',
+      value: str[i],
+      ascii: str.charCodeAt(i),
+    }
+    i++
+    node.end = i
+    node.raw = str.slice(node.start, node.end)
+    return node
+  }
+
+  // [^abc]
+  function parseCharacterClass() {
+    var node = {
+      type: 'CharacterClass',
+      start: i,
+      end: 0,
+      raw: '',
+      elements: [],
+      revert: false, // 字符集是否取反，即中括号内是否是^开头
+    }
+    i++ // skip [
+    if (str[i] == '^') {
+      node.revert = true
+      i++ // skip ^
+    }
+
+    while (str[i] != ']') {
+      var charNode = parseCharacter()
+      node.elements.push(charNode)
+    }
+    i++ // skip ]
+    node.end = i
+    node.raw = str.slice(node.start, node.end)
+    return node
+  }
+
+  // 解析出单个完整的部分，可以是字符，字符集，括号，量词等
+  function parseOneElement() {
+    if (str[i] == '[') {
+      return parseCharacterClass()
+    }
+    if (str[i] == '(') {
+      return parseCaptureGroup()
+    }
+    if (str[i] == '\\') {
+      return parseEscape() // 解析转义
+    }
+    if (str[i] == '?' || str[i] == '*' || str[i] == '+' || str[i] == '{') {
+      return parseQuantifier()
+    }
+    return parseCharacter()
+  }
+
+  function parseQuantifier() {
+    var node = {
+      type: 'Quantifier',
+      start: i,
+      end: 0,
+      raw: '',
+      element: null, // 重复的具体内容
+      greedy: true, // 是否贪婪匹配
+      min: 0, // 最少重复次数
+      max: Infinity, // 最多重复次数
+    }
+    if (str[i] == '*') {
+      i++
+    } else if (str[i] == '?') {
+      node.max = 1
+      i++
+    } else if (str[i] == '+') {
+      node.min = 1
+      i++
+    } else if (str[i] == '{') {
+      // {111,222}  {22332,}
+      i++ // skip {
+      var min = parseNumber()
+      node.min = min
+      if (str[i] == '}') {
+        node.max = min
+      } else {
+        i++ // skip ,
+        if (str[i] == '}') {
+          i++ // skip }
+        } else {
+          var max = parseNumber()
+          node.max = max
+          i++ // skip }
+        }
+      }
+    }
+    if (str[i] == '?') {
+      node.greedy = false // 非贪婪匹配
+      i++
+    }
+    node.end = i
+    node.raw = str.slice(node.start, node.end)
+    return node
+  }
+
+  function parseNumber() {
+    var numStr = ''
+    while(str[i] >= '0' && str[i] <= '9') {
+      numStr += str[i]
+      i++
+    }
+    return Number(numStr)
+  }
+
+  // a(bbb)?c|[def]*(x)
+  // aaa|bbbccc|fowei|sofiew
+  // (aaa|bbbccc|fowei|sofiew)
+  function parseAlternative() {
+    var node = {
+      type: 'Alternative',
+      start: i,
+      end: 0,
+      raw: '',
+      elements: [],
+    }
+
+    // 遇到 | 或 ) 到 字符串的结束 时停
+    while(str[i] !== '|' && str[i] !== ')' && i < str.length) {
+      var element = parseOneElement()
+      if (element.type == 'Quantifier') { // 如果解析出了量词，把之前push进去的单个元素取出来，跟量词放在一起
+        var quantifierElement = element
+        var prevElement = node.elements.pop()
+        if (prevElement.type == 'Quantifier') {
+          throw new SyntaxError('unexpected quantifier at pos: ' + i)
+        }
+        quantifierElement.element = prevElement
+        quantifierElement.start = prevElement.start
+        quantifierElement.raw = str.slice(quantifierElement.start, quantifierElement.end)
+        node.elements.push(quantifierElement)
+      } else {
+        node.elements.push(element)
+      }
+    }
+
+    node.end = i
+    node.raw = str.slice(node.start, node.end)
+    return node
+  }
+
+  function parseAlternatives() {
+    var alternatives = []
+
+    do {
+      var alt = parseAlternative()
+      alternatives.push(alt)
+      if (str[i] == '|') {
+        i++
+      } else if (str[i] == ')') {
+        break
+      } else if (i >= str.length) {
+        break
+      }
+    } while(true)
+
+    return alternatives
+  }
+
+  function parseCaptureGroup() {
+    var node = {
+      type: 'CaptureGroup',
+      start: i,
+      end: 0,
+      raw: '',
+      assertion: false, // 是否是零宽断言
+        lookahead: true, // 是否为预测断言，即向右看，为false时为回顾断言，即向左看
+        positive: true, // 正向断言，即断言存在某种匹配
+      index: groupIndex++, // 分组编号
+      name: null, // 分组名称
+    }
+
+    // (foo|bar)
+    // (?:foo)
+    // (?=foo)
+    // (?!foo)
+    // (?<=foo)
+    // (?<!foo|bar)
+    // (?<xxx>foobar)
+    i++ // skip (
+    if (str[i] == '?') {
+      i++ // skip ?
+      if (str[i] == ':') {
+        node.index = 0
+        groupIndex--
+        i++
+      } else if (str[i] == '=') {
+        node.index = 0
+        groupIndex--
+        node.assertion = true
+        i++
+      } else if (str[i] == '!') {
+        node.index = 0
+        groupIndex--
+        node.assertion = true
+        node.positive = false // 负向断言
+        i++
+      } else if (str[i] == '<') {
+        i++ // skip <
+        if (str[i] == '=') {
+          node.assertion = true
+          node.lookahead = false
+          node.index = 0
+          groupIndex--
+          i++
+        } else if (str[i] == '!') {
+          node.assertion = true
+          node.lookahead = false
+          node.positive = false
+          node.index = 0
+          groupIndex--
+          i++
+        } else { // 具名分组
+          var name = parseGroupName()
+          node.name = name
+          i++ // skip >
+        }
+      }
+    }
+
+    node.alternatives = parseAlternatives()
+    i++ // skip )
+
+    node.end = i
+    node.raw = str.slice(node.start, node.end)
+    return node
+  }
+
+  // 解析分组名称
+  function parseGroupName() {
+    var simStr = ''
+    while (str[i] !== '>') {
+      simStr += str[i]
+      i++
+    }
+    return simStr.trim()
+  }
+
+  function parsePattern(input) {
+    str = input
+    i = 0
+    groupIndex = 1
+
+    return {
+      type: 'Pattern',
+      alternatives: parseAlternatives(),
+      raw: input,
+    }
+  }
+
+
+  function createGraph(node) {
+    if (node.type == 'Character') {
+      return createCharacterGraph(node)
+    }
+    if (node.type == 'CharacterClass') {
+      return createCharacterClassGraph(node)
+    }
+    if (node.type == 'Quantifier') {
+      return createQuantifierGraph(node)
+    }
+    if (node.type == 'Alternative') {
+      return createAlternativeGraph(node)
+    }
+    if (node.type == 'CaptureGroup') {
+      return createCaptureGroupGraph(node) // node.alternatives
+    }
+    if (node.type == 'Pattern') {
+      return createPatternGraph(node)      // node.alternatives
+    }
+  }
+
+  var padding = 10
+
+  function createCharacterGraph(node) {
+    var text = svgElt('text', {
+      y: 25,
+      x: padding,
+    })
+    text.textContent = node.value
+    var textBox = text.getBBox()
+    var g = svgElt('g')
+
+    var rect = svgElt('rect', {
+      width: textBox.width + 2 * padding,
+      height: textBox.height + 2 * padding,
+      fill: '#dae9e5',
+      rx: padding / 4,
+      ry: padding / 4,
+    })
+
+    g.append(rect)
+    g.append(text)
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  function add(a, b) {
+    return a + b
+  }
+
+  function max(a, b) {
+    return Math.max(a, b)
+  }
+
+  function createAlternativeGraph(node) {
+    var subGraphs = node.elements.map(createGraph)
+    var width = subGraphs.map(it => it.box.width).reduce(add) + (subGraphs.length + 1) * padding
+    var height = subGraphs.map(it => it.box.height).reduce(max) + 2 * padding
+    var g = svgElt('g')
+    var rect = svgElt('rect', {
+      width: width,
+      height: height,
+      fill: 'pink',
+    })
+    g.append(rect)
+
+    var line = svgElt('path', {
+      stroke: 'black', // line color
+      'stroke-width': '2',
+      fill: 'none',
+    })
+    g.append(line)
+
+    var d = ''
+    var offset = padding
+    for (var graph of subGraphs) {
+      graph.g.style.transform = `translate(${offset}px, ${(height - graph.box.height) / 2}px)`
+      g.append(graph.g)
+      d += `M ${offset} ${height / 2} h -${padding}`
+      line.setAttribute('d', d)
+      offset += padding + graph.box.width
+    }
+
+    d += `M ${offset} ${height / 2} h -${padding}`
+    line.setAttribute('d', d)
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  function createCharacterClassGraph(node) {
+    var subGraphs = node.elements.map(createGraph) // 得到每个字符的图像
+    var width = subGraphs.map(it => it.box.width).reduce(max) + 2 * padding
+    var height = subGraphs.map(it => it.box.height).reduce(add) + (subGraphs.length + 1) * padding
+
+    var g = svgElt('g')
+    var rect = svgElt('rect', {
+      width: width,
+      height: height,
+      fill: '#cbcbba',
+    })
+    g.append(rect)
+
+    var offset = padding
+    for (var graph of subGraphs) {
+      graph.g.style.transform = `translate(${(width - graph.box.width) / 2}px, ${offset}px)`
+      g.append(graph.g)
+      offset += padding + graph.box.height
+    }
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  function createAlternativesGraph(nodes) {
+    var subGraphs = nodes.map(createGraph)
+    var width = subGraphs.map(it => it.box.width).reduce(max) + 6 * padding
+    var height = subGraphs.map(it => it.box.height).reduce(add) + (subGraphs.length + 1) * padding
+    var g = svgElt('g')
+    var rect = svgElt('rect', {
+      width: width,
+      height: height,
+      fill: 'lightgreen',
+    })
+    g.append(rect)
+
+    var path = svgElt('path', {
+      stroke: 'black',
+      'stroke-width': '2',
+      fill: '0'
+    })
+    g.append(path)
+
+    var d = '' // 路径绘图指令
+    var offset = padding
+    for (var graph of subGraphs) {
+      graph.g.style.transform = `translate(${(width - graph.box.width) / 2}px, ${offset}px)`
+      g.append(graph.g)
+      d += `M ${0} ${height / 2} L ${(width - graph.box.width) / 2} ${offset + graph.box.height / 2}`
+      d += `M ${width} ${height / 2} L ${width - (width - graph.box.width) / 2} ${offset + graph.box.height / 2}`
+      path.setAttribute('d', d)
+      offset += padding + graph.box.height
+    }
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  function createPatternGraph(node) {
+    var graph = createAlternativesGraph(node.alternatives)
+    return graph
+  }
+
+  function createTextGraph(str) {
+    var text = svgElt('text', {
+      'dominant-baseline': 'text-before-edge',
+    })
+
+    text.textContent = str
+    var textBox = text.getBBox()
+    var rect = svgElt('rect', {
+      width: textBox.width,
+      height: textBox.height,
+      fill: 'yellow'
+    })
+
+    var g = svgElt('g')
+    g.append(rect)
+    g.append(text)
+
+    return {
+      g: g,
+      box: g.getBBox()
+    }
+  }
+
+  function createQuantifierGraph(node) {
+    var subGraph = createGraph(node.element)
+    var height = subGraph.box.height + 2 * padding
+    var width = node.min == 0 ? subGraph.box.width + 4 * padding : subGraph.box.width + 2 * padding
+    var g = svgElt('g')
+    var rect = svgElt('rect', {
+      width: width,
+      height: height,
+      fill: 'none'
+    })
+    g.append(rect)
+
+    subGraph.g.style.transform = `translate(${(width - subGraph.box.width) / 2}px, ${padding}px)`
+    g.append(subGraph.g)
+
+    var line = svgElt('path', {
+      stroke: 'black',
+      'stroke-width': '2',
+      fill: 'none',
+    })
+    g.append(line)
+
+    var d = ''
+
+    if (node.min == 0) {
+      d += `
+        M ${0} ${height / 2}
+        a ${padding} ${padding} 0 0 0 ${padding} -${padding}
+        v -${subGraph.box.height / 2 - padding}
+        a ${padding} ${padding} 0 0 1 ${padding} -${padding}
+        h ${subGraph.box.width}
+        a ${padding} ${padding} 0 0 1 ${padding} ${padding}
+        v ${subGraph.box.height / 2 - padding}
+        a ${padding} ${padding} 0 0 0 ${padding} ${padding}
+      `
+      line.setAttribute('d', d)
+    }
+    if (node.max > 1) {
+      d += `
+        M ${width - (width - subGraph.box.width) / 2 } ${height / 2}
+        a ${padding} ${padding} 0 0 1 ${padding} ${padding}
+        v ${subGraph.box.height / 2 - padding}
+        a ${padding} ${padding} 0 0 1 -${padding} ${padding}
+        h -${subGraph.box.width}
+        a ${padding} ${padding} 0 0 1 -${padding} -${padding}
+        v -${subGraph.box.height / 2 - padding}
+        a ${padding} ${padding} 0 0 1 ${padding} -${padding}
+      `
+      line.setAttribute('d', d)
+    }
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  function createCaptureGroupGraph(node) {
+    var graph = createAlternativesGraph(node.alternatives)
+    var width = graph.box.width + 2 * padding
+    var height = graph.box.height + 4 * padding
+
+    var g = svgElt('g')
+    var rect = svgElt('rect', {
+      width: width,
+      height: height,
+      fill: 'aqua',
+    })
+    g.append(rect)
+
+    var border = svgElt('rect', {
+      width: graph.box.width,
+      height: graph.box.height,
+      rx: padding / 2,
+      ry: padding / 2,
+      fill: 'none',
+      stroke: 'grey',
+      'stroke-dasharray': '4 5',
+    })
+
+    graph.g.style.transform = `translate(${padding}px, ${2 * padding}px)`
+    g.append(graph.g)
+
+    border.style.transform = `translate(${padding}px, ${2 * padding}px)`
+    g.append(border)
+
+    if (node.index > 0) {
+      var text = createTextGraph('Group #' + node.index)
+      g.append(text.g)
+    } else if (node.assertion) {
+      var str = ''
+      if (node.positive) {
+        str += 'positive '
+      } else {
+        str += 'negative '
+      }
+
+      if (node.lookahead) {
+        str += 'lookahead'
+      } else {
+        str += 'lookbehand'
+      }
+
+      var text = createTextGraph(str)
+      g.append(text.g)
+    }
+
+    return {
+      g: g,
+      box: g.getBBox(),
+    }
+  }
+
+  var svg = document.querySelector('svg')
+
+  function svgElt(tagName, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tagName)
+    for (var key in attrs) {
+      var val = attrs[key]
+      el.setAttribute(key, val)
+    }
+    svg.append(el)
+    return el
+  }
+
+  debugger
+  str = '(a(a(a)?)+)*(p|d|(?<testname>ccc|ddd|eee|fff))(?!foo)(hufa|((a{2,4}b{0,99}c{1,99}d{3}e{4}f{4,})*)*(?:[^aeiwu]*)*(cd|ef|(fo[odc]+)+dd)+c[def]|def|abc)'
+
+  var node = parsePattern(str)
+
+  createPatternGraph(node)
+
+</script>
