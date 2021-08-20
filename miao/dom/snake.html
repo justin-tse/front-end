@@ -1,0 +1,154 @@
+<body>
+
+  <pre></pre>
+
+</body>
+<script>
+  class SnakeGame {
+    // [
+    //   [0,0,0,0,0,0,0,0,0]
+    //   [0,0,0,0,0,0,0,0,0]
+    //   [0,0,.,0,A,0,0,0,0]
+    //   [0,0,0,.,^,<,<,<,0]
+    //   [0,0,Q,0,0,0,0,^,0]
+    //   [0,0,0,0,0,0,0,0,0]
+    // ]
+    constructor(width = 10, height = 10) {
+      this.width = width
+      this.height = height
+      this.world = null
+      this.snakeLength = 0 // 蛇身体的长度
+      this.headpos = null // 蛇头的位置, {x: 5, y: 8}, [2, 5]
+      this.tailpos = null // 蛇尾的位置
+      this.isGameOver = false
+      this.init()
+    }
+    //初始化蛇的位置
+    init() {
+      this.world = Array(this.height).fill(0).map(it => Array(this.width).fill('.'))
+      this.world[3][3] = '>'
+      this.snakeLength = 1
+
+      this.headpos = {row: 3, col: 3}
+      this.tailpos = {row: 3, col: 3}
+
+      this.placeApple()
+    }
+
+    placeApple() {
+      var row = Math.floor(this.height * Math.random())
+      var col = Math.floor(this.width * Math.random())
+      if (this.world[row][col] == '.') {
+        this.world[row][col] = 'Q'
+      } else {
+        this.placeApple()
+      }
+    }
+
+    // 返回世界某个坐标的符号
+    getChar(pos) {
+      return this.world[pos.row][pos.col]
+    }
+    // 设置世界某个坐标的符号
+    setChar(pos, char) {
+      this.world[pos.row][pos.col] = char
+    }
+
+    // 获取pos位置指向的下一位置的坐标
+    getNextPos(pos) {
+      var currChar = this.getChar(pos)
+      if (currChar == '>') {
+        return {row: pos.row, col: pos.col + 1}
+      }
+      if (currChar == '<') {
+        return {row: pos.row, col: pos.col - 1}
+      }
+      if (currChar == '^') {
+        return {row: pos.row - 1, col: pos.col}
+      }
+      if (currChar == 'v') {
+        return {row: pos.row + 1, col: pos.col}
+      }
+    }
+
+    gameOver() {
+      this.isGameOver = true
+      setTimeout(() => {
+        alert('game over, score:' + this.snakeLength)
+      })
+    }
+
+    next() {
+      if (this.isGameOver) {
+        return
+      }
+      var headChar = this.getChar(this.headpos) // 头的符号
+      var headNextPos = this.getNextPos(this.headpos) // 头的下一位置的坐标
+      var headNextChar = this.getChar(headNextPos) // 头的下一个位置的符号
+      if (headNextChar == '.') {
+        this.setChar(headNextPos, headChar)
+        this.headpos = headNextPos // 更新蛇头的位置
+      } else if (headNextChar == 'Q') {
+        this.setChar(headNextPos, headChar)
+        this.headpos = headNextPos // 更新蛇头的位置
+        this.placeApple()
+      } else {
+        this.gameOver()
+      }
+
+      if (headNextChar == '.') {
+        var tailNextPos = this.getNextPos(this.tailpos) // 尾的下一位置的坐标
+        this.setChar(this.tailpos, '.')
+        this.tailpos = tailNextPos
+      }
+
+      return this
+    }
+
+    changeDirection(direction) {
+      switch(direction) {
+        case 'up':    return this.setChar(this.headpos, '^')
+        case 'down':  return this.setChar(this.headpos, 'v')
+        case 'left':  return this.setChar(this.headpos, '<')
+        case 'right': return this.setChar(this.headpos, '>')
+      }
+    }
+
+    print() {
+      console.log(this.toString())
+    }
+    toString() {
+      return this.world.map(row => {
+        return row.map(char => {
+          if (char == '.') {
+            return '□'//□■
+          } else {
+            return '■'
+          }
+        }).join('')
+      }).join('\n')
+    }
+  }
+
+  var game = new SnakeGame()
+
+  var pre = document.querySelector('pre')
+
+  document.addEventListener('keydown', e => {
+    if (e.key.startsWith('Arrow')) {
+      var direction = e.key.slice(5).toLocaleLowerCase()
+      game.changeDirection(direction)
+      clearInterval(id)
+      tick()
+      id = setInterval(tick, 1000)
+    }
+  })
+
+  pre.textContent = game.toString()
+  function tick() {
+    game.next()
+    pre.textContent = game.toString()
+    console.log(game.toString())
+  }
+  var id = setInterval(tick, 1000)
+</script>
