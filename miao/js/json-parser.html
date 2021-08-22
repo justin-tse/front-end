@@ -1,5 +1,7 @@
 <script>
 
+
+
   var parseJSON = (function() {
     var str = '[1,"fooo",[1,222235,true],{"a":1,"b":[1,2,3],"c":{"x":1,"yyy":false}},5,null]'
     var i = 0
@@ -82,10 +84,13 @@
       var result = []
       i++
       while (str[i] !== ']') {
+        skipSpace()
         var val = parseValue()
+        skipSpace()
         result.push(val)
         if (str[i] == ',') {
           i++ // 跳过这个逗号
+          skipSpace()
         } else if (str[i] == ']') {
           break
         } else {
@@ -211,5 +216,27 @@
     }
 
   }
+
+
+  function traverse(root, action) {
+    if (root) {
+      if (action(root.val) === false) {
+        return false
+      }
+      if (traverse(root.left, action) === false) {
+        return false
+      }
+      if (traverse(root.right, action) === false) {
+        return false
+      }
+      return true
+    }
+  }
+
+  traverse(root, val => {
+    if (val == 8) {
+      return false
+    }
+  })
 
 </script>
