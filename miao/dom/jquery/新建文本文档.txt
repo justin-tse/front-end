@@ -1,0 +1,10 @@
+<body>
+
+</body>
+<script src="jquery.js"></script>
+
+<script>
+  for (var i = 409; i >= 400; i--) {
+    $('<div></div>').load(`https://weekly.75.team/issue${i}.html .content`).appendTo(document.body)
+  }
+</script>
