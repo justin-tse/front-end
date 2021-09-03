@@ -1,0 +1,38 @@
+<script>
+
+  (function() {
+    function readFile(url) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('get', url, false)
+      xhr.send()
+      return xhr.responseText
+    }
+
+    // 给定模块名称/文件名，返回模块的导出(即模块将要提供给外界的接口)
+    function require(name) {
+      // 查看模块是否已经被加载，如果是的话直接从缓存返回
+      if (name in require.cache) {
+        return require.cache[name].exports
+      }
+
+      var code = readFile(name) // 读取文件内容
+      var codeFunc = new Function('module, exports', code)
+
+      var module = {
+        id: name,
+        exports: {}
+      }
+
+      codeFunc(module, module.exports, require)
+
+      require.cache[name] = module
+
+      return module.exports
+    }
+
+    // 模块的缓存，由模块名映射到模块对象
+    require.cache = {}
+
+    window.require = require
+  })()
+</script>
