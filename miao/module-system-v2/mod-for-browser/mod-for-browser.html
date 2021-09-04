@@ -1,0 +1,144 @@
+<script>
+// 在浏览器端几乎无法使用同步请求加载模块文件
+// 因为同步请求的话文件只能一个一个按顺序加载（串行加载），相对来说需要更久的时间
+// 文件加载过程中以及模块的加载过程中页面都是无响应的
+
+  // (function() {
+    function readFile(url, callback) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('get', url)
+      xhr.onload = function() {
+        callback(xhr.responseText)
+      }
+      xhr.send()
+    }
+
+    // 给定模块名称/文件名，返回模块的导出(即模块将要提供给外界的接口)
+    function require(name) {
+      // 查看模块是否已经被加载，如果是的话直接从缓存返回
+      if (name in require.cache) {
+        return require.cache[name].exports
+      }
+
+      var code = require.codeCache[name] // 读取文件内容
+      var codeFunc = new Function('module, exports', code)
+
+      var module = {
+        id: name,
+        exports: {}
+      }
+
+      require.cache[name] = module
+
+      codeFunc(module, module.exports, require)
+
+      return module.exports
+    }
+
+    // 模块的缓存，由模块名映射到模块对象
+    require.cache = {}
+
+    // 模块名称映射到模块代码的缓存对象
+    require.codeCache = {}
+
+
+    // 给定入口文件，加载所有依赖，并执行它
+    require.createBundle = function(entry) {
+      loadAllDeps2(entry)
+      // loadAllDeps(entry, () => {
+
+        var bundleResult = `
+          function require(name) {
+            // 查看模块是否已经被加载，如果是的话直接从缓存返回
+            if (name in require.cache) {
+              return require.cache[name].exports
+            }
+
+            var code = require.codeCache[name] // 读取文件内容
+            var codeFunc = new Function('module, exports', code)
+
+            var module = {
+              id: name,
+              exports: {}
+            }
+
+            require.cache[name] = module
+
+            codeFunc(module, module.exports, require)
+
+            return module.exports
+          }
+
+          // 模块的缓存，由模块名映射到模块对象
+          require.cache = {}
+
+          require.codeCache = ${JSON.stringify(require.codeCache, null, 2)}
+
+          require("${entry}")
+        `
+        console.log(bundleResult)
+        // require(entry)
+      // })
+    }
+
+    // 加载模块及模块依赖的所有模块，并缓存
+    // 完成后调用callback
+    function loadAllDeps(moduleName, callback) {
+      if (require.codeCache[moduleName]) {//处理可能存在的循环依赖
+        callback()
+        return
+      }
+
+      readFile(moduleName, code => {
+        require.codeCache[moduleName] = code // 将模块的代码缓存
+        var deps = getDeps(code)//获取当前模块依赖
+        if (deps.length > 0) {// 有依赖，递归调用loadAllDeps
+          var loaded = 0
+          for (var dep of deps) {
+            loadAllDeps(dep, () => {
+              loaded++
+              if (loaded == deps.length) {
+                callback()
+              }
+            })
+          }
+        } else { // 当前模块没有依赖，即完成了
+          callback()
+        }
+      })
+    }
+
+    function readFileSync(url) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('get', url, false)
+      xhr.send()
+      return xhr.responseText
+    }
+    // loadAllDeps的同步版本
+    function loadAllDeps2(moduleName) {
+      if (require.codeCache[moduleName]) {
+        return
+      }
+      var code = readFileSync(moduleName)
+      require.codeCache[moduleName] = code
+      var deps = getDeps(code)
+      for (var dep of deps) {
+        loadAllDeps2(dep)
+      }
+      return
+    }
+
+    // 由模块源代码得到模块依赖的模块名称
+    function getDeps(code) {
+      var re = /require\s*\(\s*["']([^"']+)["']\s*\)/g
+      var deps = []
+      var match = null
+      while(match = re.exec(code)) {
+        deps.push(match[1])
+      }
+      return deps
+    }
+
+    window.require = require
+  // })()
+</script>
