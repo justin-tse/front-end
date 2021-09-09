@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mocha Tests</title>
+    <link rel="stylesheet" href="https://unpkg.com/mocha@5.2.0/mocha.css">
+    <!-- <script src="lib.js"></script> -->
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="https://unpkg.com/mocha@5.2.0/mocha.js"></script>
+    <script src="https://unpkg.com/chai@4.1.2/chai.js"></script>
+    <script>mocha.setup('bdd')</script>
+
+    <script>
+      var taskUrl = location.hash.substr(1)
+      document.write(`<script src="${taskUrl}"></scr`+'ipt>')
+    </script>
+
+    <!-- load code you want to test here -->
+
+    <!-- load your test files here -->
+    <script>
+      assert = chai.assert
+      chai.should()
+      // Object.prototype.should = 
+      
+
+      assert(      , 'woiefj')
+
+      'foo'.should.not.deep.equal.to(2)
+      obj.should.has.a.property('a').and.equal.to(3)
+
+      assert('a' in obj && obj.a === undefined)
+
+      describe('是否实现了', () => {
+        it('MyMap', () => {
+          assert(typeof MyMap === 'function', '构造函数需要是一个函数')
+        })
+        it('MySet', () => {
+          assert(typeof MySet === 'function', '构造函数需要是一个函数')
+        })
+        it('MyArray', () => {
+          assert(typeof MyArray === 'function', '构造函数需要是一个函数')
+        })
+      })
+
+      describe('测试MyMap', () => {
+        describe('构造函数', () => {
+          it('不带参数调用构造函数', () => {
+            var m = new MyMap()
+            m.set(1,2)
+            m.set(NaN, 3)
+            assert(m.get(1) === 2)
+            assert(m.get(NaN) === 3)
+          })
+          it('以new MyMap([[1,2],[3,4]])调用构造函数', () => {
+            var m = new MyMap([[1,2],[3,4]])
+            assert(m.get(1) === 2)
+            assert(m.get(3) === 4)
+          })
+        })
+
+        describe('方法', () => {
+          it('#get/set()', () => {
+            var m = new MyMap()
+            m.set(1, 2)
+            m.set(NaN, 2)
+            m.set(NaN, 3)
+            assert(m.get(1) === 2)
+            assert(m.get(NaN) === 3)
+          })
+          it('#size 是一个getter', () => {
+            var m = new MyMap()
+            var d = Object.getOwnPropertyDescriptor(m.__proto__, 'size')
+            assert(typeof d.get === 'function')
+            assert(d.set === undefined)
+          })
+          it('#size的返回值', () => {
+            var m = new MyMap()
+            m.set(1,2)
+            m.set(NaN, 4)
+            m.set(NaN, 5)
+            assert(m.size === 2)
+          })
+          it('#clear', () => {
+            var m = new MyMap()
+            m.set(1,2)
+            m.set(2,3)
+            m.clear()
+
+            assert(m.size === 0)
+          })
+        })
+
+      })
+
+      describe('测试MySet', () => {
+        describe('构造函数', () => {
+          it('不带参数调用', () => {
+            var s = new Set()
+            s.add(1)
+            s.add(1)
+            s.add(2)
+            assert(s.size == 2, '不能有重复元素')
+          })
+          it('带参数调用', () => {
+            var s = new Set([1,2,2,3])
+            assert(s.size === 3)
+          })
+        })
+      })
+    </script>
+
+    <script>
+      mocha.run();
+    </script>
+  </body>
+</html>
+
+<script>
+
+  function Should(val) {
+    this.val = val
+  }
+
+  Should.prototype = {
+    equal: function(val) {
+      if (this.val != val) {
+        throw new Error()
+      }
+    },
+    greaterThan: function(val) {
+      if (this.val <= val) {
+        throw new Error
+      }
+    }
+  }
+
+
+  Object.defineProperty(Object.prototype, 'should', {
+    get: function() {
+      return new Should(this)
+    }
+  })
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+<script>
+  
+  describe('foo', () => {
+    describe('bar', () => {
+      describe('a', () => {
+        describe('a.a', () => {})
+      })
+      describe('b', () => {})
+    })
+    describe('baz', () => {
+      describe('aa', () => {})
+      describe('bb', () => {})
+    })
+  })
+
+  foo
+    bar
+      a
+        a.a
+      b
+    baz
+      aa
+      bb
+
+</script>

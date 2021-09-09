@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    .warn {
+      color: red;
+    }
+    body, pre {
+      margin: 0;
+    }
+    code {
+      font-family: consolas;
+    }
+  </style>
+
+  <script>
+    var themes = [
+      'a11y-dark.min.css',
+      'a11y-light.min.css',
+      'agate.min.css',
+      'an-old-hope.min.css',
+      'androidstudio.min.css',
+      'arduino-light.min.css',
+      'arta.min.css',
+      'ascetic.min.css',
+      'atelier-cave-dark.min.css',
+      'atelier-cave-light.min.css',
+      'atelier-dune-dark.min.css',
+      'atelier-dune-light.min.css',
+      'atelier-estuary-dark.min.css',
+      'atelier-estuary-light.min.css',
+      'atelier-forest-dark.min.css',
+      'atelier-forest-light.min.css',
+      'atelier-heath-dark.min.css',
+      'atelier-heath-light.min.css',
+      'atelier-lakeside-dark.min.css',
+      'atelier-lakeside-light.min.css',
+      'atelier-plateau-dark.min.css',
+      'atelier-plateau-light.min.css',
+      'atelier-savanna-dark.min.css',
+      'atelier-savanna-light.min.css',
+      'atelier-seaside-dark.min.css',
+      'atelier-seaside-light.min.css',
+      'atelier-sulphurpool-dark.min.css',
+      'atelier-sulphurpool-light.min.css',
+      'atom-one-dark.min.css',
+      'atom-one-dark-reasonable.min.css',
+      'atom-one-light.min.css',
+      'brown-paper.min.css',
+      'codepen-embed.min.css',
+      'color-brewer.min.css',
+      'darcula.min.css',
+      'dark.min.css',
+      'darkula.min.css',
+      'default.min.css',
+      'docco.min.css',
+      'dracula.min.css',
+      'far.min.css',
+      'foundation.min.css',
+      'github.min.css',
+      'github-gist.min.css',
+      'gml.min.css',
+      'googlecode.min.css',
+      'grayscale.min.css',
+      'gruvbox-dark.min.css',
+      'gruvbox-light.min.css',
+      'hopscotch.min.css',
+      'hybrid.min.css',
+      'idea.min.css',
+      'ir-black.min.css',
+      'isbl-editor-dark.min.css',
+      'isbl-editor-light.min.css',
+      'kimbie.dark.min.css',
+      'kimbie.light.min.css',
+      'lightfair.min.css',
+      'magula.min.css',
+      'mono-blue.min.css',
+      'monokai.min.css',
+      'monokai-sublime.min.css',
+      'night-owl.min.css',
+      'nord.min.css',
+      'obsidian.min.css',
+      'ocean.min.css',
+      'paraiso-dark.min.css',
+      'paraiso-light.min.css',
+      'pojoaque.min.css',
+      'purebasic.min.css',
+      'qtcreator_dark.min.css',
+      'qtcreator_light.min.css',
+      'railscasts.min.css',
+      'rainbow.min.css',
+      'routeros.min.css',
+      'school-book.min.css',
+      'shades-of-purple.min.css',
+      'solarized-dark.min.css',
+      'solarized-light.min.css',
+      'sunburst.min.css',
+      'tomorrow.min.css',
+      'tomorrow-night.min.css',
+      'tomorrow-night-blue.min.css',
+      'tomorrow-night-bright.min.css',
+      'tomorrow-night-eighties.min.css',
+      'vs.min.css',
+      'vs2015.min.css',
+      'xcode.min.css',
+      'xt256.min.css',
+      'zenburn.min.css',
+    ]
+
+    var idx = Math.random() * themes.length | 0
+
+    document.write(`<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/styles/${themes[idx]}">`)
+  </script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/highlight.min.js"></script>
+
+</head>
+
+<body>
+  <button onclick="location.reload()">刷新</button>
+  <pre contenteditable><code id="source" class="html"></code></pre>
+  <div id="error"></div>
+</body>
+<script>
+
+main()
+
+window.onhashchange = main
+
+async function main() {
+  var taskUrl = location.hash.substr(1)
+  var targetUrl = taskUrl// + '?' + Date.now()
+  let req
+  let code
+  error.innerHTML = ''
+
+  try {
+    req = await fetch(targetUrl)
+    if (req.status == 404) {
+      error.innerHTML = `
+        <div>
+          <h1 class="warn">作业文件未上传，或文件路径错误<br>当前作业需上传至如下地址：<br>${taskUrl}</h1>
+          状态：404
+        </div>
+      `
+    } else {
+      code = await req.text()
+      source.innerText = code
+      hljs.highlightBlock(source)
+    }
+  } catch (e) {//404页面没有cors，会请求失败抛错
+    console.log(e)
+    error.innerHTML = `
+      <div>
+        <h1 class="warn">[username].github.io仓库未创建<br>或名为 miao 的仓库 Pages 服务未启用</h1>
+        状态：请求文件失败
+      </div>
+    `
+  }
+}
+
+</script>
+
+</html>

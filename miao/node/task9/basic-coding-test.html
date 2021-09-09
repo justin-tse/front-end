@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic Coding Test</title>
+  <style>
+    #test-result {
+      column-width: 90px
+    }
+    pre span {
+      display: inline-block;
+      width: 100%;
+    }
+
+    .none {
+      color:#FF4136
+    }
+    .ac {
+      color:#2ECC40
+    }
+    .wa {
+      color:#FFDC00
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <pre id="test-result"></pre>
+  </div>
+</body>
+<script src="../lodash-tester/libs/infiniteLoopDetecter.js"></script>
+<script>
+  function ioNormalize(io) {
+    return io.split(/\s+/g).filter(it => !!it)
+  }
+
+  function testProblem($$code, $$input, $$expectedOutput) {
+    var $$i = 0;
+    var $$output = []
+
+    $$input = ioNormalize($$input)
+    $$expectedOutput = ioNormalize($$expectedOutput).join(' ')
+
+    function prompt() {
+      return $$input[$$i++]
+    }
+    function confirm() {}
+    function log(...value) {
+      $$output.push(...value.map(it => it.toString()))
+    }
+
+	  var window = {
+      prompt: prompt
+    }
+
+    var document = {
+      write: log
+    }
+
+    var console = {
+      log: log
+    }
+
+    var alert = log
+
+    try {
+      eval(infiniteLoopDetector.wrap($$code))
+    } catch(e) {
+      if (e.type === 'InfiniteLoop') {
+        return `疑似死循环，请检查代码`
+      }
+      return `报错：\n${e}`
+    }
+
+    if ($$output.join(' ') == $$expectedOutput) {
+      return true
+    } else {
+      return `输入：\n${$$input.join(' ')}\n输出：\n${$$output.join(' ')}`
+    }
+  }
+
+  function getProblemCode(id) {
+    var el = document.querySelector('#' + id)
+    if (el) {
+      let code = el.textContent
+      if (code.trim().length < 10) {
+        return ''
+      }
+      return code
+    }
+
+    return ''
+  }
+
+  var problems = {
+    "sort": [{
+      "input": "4 1 7",
+      "output": "1 4 7"
+    }],
+    "narcissistic": [{
+      "input": "153",
+      "output": "YES"
+    }, {
+      "input": "122",
+      "output": "NO"
+    }, {
+      "input": "370",
+      "output": "YES"
+    }],
+    "narcissistics": [{
+      "input": "",
+      "output": "153 370 371 407"
+    }],
+    "palindrom": [{
+      "input": "12321",
+      "output": "YES"
+    }, {
+      "input": "112233",
+      "output": "NO"
+    }, {
+      "input": "1125211",
+      "output": "YES"
+    }],
+    "weekday": [{
+      "input": "2018 6",
+      "output": "5"
+    }, {
+      "input": "2019 6",
+      "output": "6"
+    }, {
+      "input": "2019 7",
+      "output": "1"
+    }],
+    "complete-number": [{
+      "input": "6",
+      "output": "YES"
+    }, {
+      "input": "7",
+      "output": "NO"
+    }],
+    "complete-numbers": [{
+      "input": "",
+      "output": "6 28 496"
+    }],
+    "prime": [{
+      "input": "7",
+      "output": "YES"
+    }, {
+      "input": "1",
+      "output": "NO"
+    }, {
+      "input": "2",
+      "output": "YES"
+    }],
+    "primes": [{
+      "input": "",
+      "output": "2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97"
+    }],
+    "itob": [{
+      "input": "123",
+      "output": "123"
+    }, {
+      "input": "-123",
+      "output": "-123"
+    }],
+    "lcf&lcm": [{
+      "input": "12 9",
+      "output": "36 3"
+    }],
+    "7": [{
+      "input": "",
+      "output": ""
+    }],
+    "sqrt": [{
+      "input": "2",
+      "output": "1.414"
+    }, {
+      "input": "3",
+      "output": "1.732"
+    }],
+
+    "ch0103/01": [
+      {
+        "input": "1 2",
+        "output": "3"
+      },
+      {
+        "input": "4 7",
+        "output": "11"
+      }
+    ],
+    "ch0103/02": [
+      {
+        "input": "2 3 5",
+        "output": "25"
+      },
+      {
+        "input": "2 1 5",
+        "output": "15"
+      }
+    ],
+    "ch0103/03": [
+      {
+        "input": "1 1 3",
+        "output": "0"
+      },
+      {
+        "input": "2 1 3",
+        "output": "1"
+      }
+    ],
+    "ch0103/04": [
+      {
+        "input": "10 3",
+        "output": "3 1"
+      }
+    ],
+    "ch0103/05": [
+      {
+        "input": "5 7",
+        "output": "0.714285714"
+      }
+    ],
+    "ch0103/06": [
+      {
+        "input": "10433 60",
+        "output": "0.575%"
+      }
+    ],
+    "ch0103/07": [
+      {
+        "input": "2.31 1.2 2 2 3",
+        "output": "33.0838692"
+      }
+    ],
+    "ch0103/08": [
+      {
+        "input": "41",
+        "output": "5.00000"
+      }
+    ],
+    "ch0103/09": [
+      {
+        "input": "3.0",
+        "output": "6.0000 18.8495 28.2743"
+      }
+    ],
+    "ch0103/10": [
+      {
+        "input": "1 2",
+        "output": "0.67"
+      }
+    ],
+    "ch0103/11": [
+      {
+        "input": "73.263 0.9973",
+        "output": "0.4601"
+      }
+    ],
+    "ch0103/12": [
+      {
+        "input": "4",
+        "output": "267.95"
+      }
+    ],
+    "ch0103/13": [
+      {
+        "input": "100",
+        "output": "001"
+      }
+    ],
+    "ch0103/14": [
+      {
+        "input": "23 11",
+        "output": "3"
+      }
+    ],
+    "ch0103/15": [
+      {
+        "input": "10 4 9",
+        "output": "7"
+      }
+    ],
+    "ch0103/16": [
+      {
+        "input": "1 1\n2 2",
+        "output": "1.414"
+      }
+    ],
+    "ch0103/17": [
+      {
+        "input": "0 0 4 0 0 3",
+        "output": "6.00"
+      }
+    ],
+    "ch0103/18": [
+      {
+        "input": "1 4 100",
+        "output": "298"
+      }
+    ],
+    "ch0103/19": [
+      {
+        "input": "3 4",
+        "output": "12"
+      }
+    ],
+    "ch0103/20": [
+      {
+        "input": "3",
+        "output": "8"
+      }
+    ],
+    "ch0104/01": [
+      {
+        "input": "1",
+        "output": "positive"
+      }
+    ],
+    "ch0104/02": [
+      {
+        "input": "-3.14",
+        "output": "3.14"
+      }
+    ],
+    "ch0104/03": [
+      {
+        "input": "5",
+        "output": "odd"
+      }
+    ],
+    "ch0104/04": [
+      {
+        "input": "A",
+        "output": "YES"
+      }
+    ],
+    "ch0104/05": [
+      {
+        "input": "1000 100",
+        "output": ">"
+      }
+    ],
+    "ch0104/06": [
+      {
+        "input": "54",
+        "output": "1"
+      }
+    ],
+    "ch0104/07": [
+      {
+        "input": "11 19",
+        "output": "1"
+      }
+    ],
+    "ch0104/08": [
+      {
+        "input": "15",
+        "output": "YES"
+      }
+    ],
+    "ch0104/09": [
+      {
+        "input": "105",
+        "output": "3 5 7"
+      }, {
+        "input": '11',
+        "output": 'n'
+      }, {
+        "input": '21',
+        "output": '3 7'
+      }
+    ],
+    "ch0104/10": [
+      {
+        "input": "50 80",
+        "output": "1"
+      }
+    ],
+    "ch0104/11": [
+      {
+        "input": "2",
+        "output": "YES"
+      }
+    ],
+    "ch0104/12": [
+      {
+        "input": "120",
+        "output": "Bike"
+      }
+    ],
+    "ch0104/13": [
+      {
+        "input": "1.0",
+        "output": "1.500"
+      }
+    ],
+    "ch0104/14": [
+      {
+        "input": "1200 y",
+        "output": "17"
+      }
+    ],
+    "ch0104/15": [
+      {
+        "input": "10 20 56",
+        "output": "56"
+      }
+    ],
+    "ch0104/16": [
+      {
+        "input": "3 4 5",
+        "output": "yes"
+      }
+    ],
+    "ch0104/17": [
+      {
+        "input": "2006",
+        "output": "N"
+      }
+    ],
+    "ch0104/18": [
+      {
+        "input": "1 1",
+        "output": "yes"
+      }
+    ],
+    "ch0104/19": [
+      {
+        "input": "1 2 +",
+        "output": "3"
+      }
+    ],
+    "ch0104/20": [
+      {
+        "input": "1.0 2.0 8.0",
+        "output": "x1=-1.00000+2.64575i;x2=-1.00000-2.64575i"
+      },
+      {
+        "input": "1 0 1",
+        "output": "x1=0.00000+1.00000i;x2=0.00000-1.00000i"
+      }
+    ],
+    "ch0104/21": [
+      {
+        "input": "10 4 9",
+        "output": "7"
+      }
+    ],
+    "ch0105/01": [
+      {
+        "input": "2\n18\n17\n",
+        "output": "17.50"
+      }
+    ],
+    "ch0105/02": [
+      {
+        "input": "100.00\n489.12\n12454.12\n1234.10\n823.05\n109.20\n5.27\n1542.25\n839.18\n83.99\n1295.01\n1.75",
+        "output": "$1581.42"
+      }
+    ],
+    "ch0105/03": [
+      {
+        "input": "2 1.0 3.0",
+        "output": "2.0000"
+      }
+    ],
+    "ch0105/04": [
+      {
+        "input": "4 344 222 343 222",
+        "output": "1131 282.75000"
+      }
+    ],
+    "ch0105/05": [
+      {
+        "input": "5\n85 78 90 99 60",
+        "output": "99"
+      }
+    ],
+    "ch0105/06": [
+      {
+        "input": "6\n3 0 8 7 5 9",
+        "output": "9"
+      }
+    ],
+    "ch0105/07": [
+      {
+        "input": "3\n1 0 3\n3 1 0\n0 3 0",
+        "output": "4 4 3 11"
+      }
+    ],
+    "ch0105/08": [
+      {
+        "input": "3\n45 60\n\n",
+        "output": "75\n"
+      }
+    ],
+    "ch0105/09": [
+      {
+        "input": "7 15",
+        "output": "55"
+      }
+    ],
+    "ch0105/10": [
+      {
+        "input": "50 85",
+        "output": "204"
+      }
+    ],
+    "ch0105/11": [
+      {
+        "input": "5\n1 5 8 10 5 \n",
+        "output": "1\n2\n1\n"
+      }
+    ],
+    "ch0105/12": [
+      {
+        "input": "3 2\n2 3 2",
+        "output": "2"
+      }
+    ],
+    "ch0105/13": [
+      {
+        "input": "2 3",
+        "output": "8"
+      }
+    ],
+    "ch0105/14": [
+      {
+        "input": "13 10",
+        "output": "13.1306"
+      }
+    ],
+    "ch0105/15": [
+      {
+        "input": "5 5000 4",
+        "output": "6077"
+      }
+    ],
+    "ch0105/16": [
+      {
+        "input": "50 10\n",
+        "output": "8\n"
+      }
+    ],
+    "ch0105/17": [
+      {
+        "input": "19",
+        "output": "4181"
+      }
+    ],
+    "ch0105/18": [
+      {
+        "input": "5\n125 99\n112 89\n145 99\n99 97\n123 98",
+        "output": "same\nworse\nbetter\nsame"
+      }
+    ],
+    "ch0105/19": [
+      {
+        "input": "1\n30 40 3",
+        "output": "7"
+      }
+    ],
+    "ch0105/20": [
+      {
+        "input": "20\n",
+        "output": "59.9219\n0.0195313\n"
+      }
+    ],
+    "ch0105/21": [
+      {
+        "input": "5",
+        "output": "5*3+1=16\n16/2=8\n8/2=4\n4/2=2\n2/2=1\nEnd"
+      }
+    ],
+    "ch0105/22": [
+      {
+        "input": "290\n230\n280\n200\n300\n170\n340\n50 \n90 \n80 \n200\n60",
+        "output": "-7"
+      },
+      {
+        "input" : "290 \n230 \n280 \n200 \n300 \n170 \n330 \n50 \n90 \n80 \n200 \n60\n",
+        "output": "1580"
+      }
+    ],
+    "ch0105/23": [
+      {
+        "input": "30\n6\n10 5 20 6 7 8",
+        "output": "2"
+      }
+    ],
+    "ch0105/24": [
+      {
+        "input": "4\n100 80\n90 50\n120 60\n140 90",
+        "output": "2"
+      }
+    ],
+    "ch0105/25": [
+      {
+        "input": "",
+        "output": "248 503 305"
+      }
+    ],
+    "ch0105/26": [
+      {
+        "input": "5\n1234 1349 6119 2123 5017",
+        "output": "3"
+      }
+    ],
+    "ch0105/27": [
+      {
+        "input": "1",
+        "output": "2"
+      }
+    ],
+    "ch0105/28": [
+      {
+        "input": "123",
+        "output": "3 2 1"
+      }
+    ],
+    "ch0105/29": [
+      {
+        "input": "123",
+        "output": "321"
+      },
+      {
+        "input": "-380",
+        "output": "-83"
+      }
+    ],
+    "ch0105/30": [
+      {
+        "input": "43833 3",
+        "output": "YES"
+      }
+    ],
+    "ch0105/31": [
+      {
+        "input": "10 10",
+        "output": "1,4,9"
+      }
+    ],
+    "ch0105/32": [
+      {
+        "input": "2",
+        "output": "3.5000"
+      }
+    ],
+    "ch0105/33": [
+      {
+        "input": "2",
+        "output": "0.5000"
+      }
+    ],
+    "ch0105/34": [
+      {
+        "input": "5",
+        "output": "153"
+      }
+    ],
+    "ch0105/35": [
+      {
+        "input": "10",
+        "output": "2.7182818011"
+      }
+    ],
+    "ch0105/36": [
+      {
+        "input": "2.0 4",
+        "output": "31.00"
+      }
+    ],
+    "ch0105/37": [
+      {
+        "input": "5 2 10",
+        "output": "6"
+      }
+    ],
+    "ch0105/38": [
+      {
+        "input": "3\n0\n10\n2\n3 2 1\n3\n10 0 1 2",
+        "output": "0\n6 2\n30 0 1"
+      }
+    ],
+    "ch0105/39": [
+      {
+        "input": "21",
+        "output": "2336"
+      }
+    ],
+    "ch0105/40": [
+      {
+        "input": "12",
+        "output": "5"
+      }
+    ],
+    "ch0105/41": [
+      {
+        "input": "\n2 22\n\n",
+        "output": "\n6\n\n"
+      },
+      {
+        "input": "\n2 100",
+        "output": "\n20"
+      }
+    ],
+    "ch0105/42": [
+      {
+        "input": "7 7 @ 1",
+        "output": "@@@@@@@\n@@@@@@@\n@@@@@@@\n@@@@@@@\n@@@@@@@\n@@@@@@@\n@@@@@@@"
+      }
+    ],
+    "ch0105/43": [
+      {
+        "input": "21",
+        "output": "7"
+      }
+    ],
+    "ch0105/44": [
+      {
+        "input": "10",
+        "output": "29"
+      }
+    ],
+    "ch0105/45": [
+      {
+        "input": "6",
+        "output": "14"
+      }
+    ]
+  }
+
+  // debugger
+
+  var testResultOutput = document.querySelector('#test-result')
+  function outputResult(content) {
+    testResultOutput.innerHTML += content + '<br>'
+  }
+
+  main()
+
+  async function main() {
+    var taskUrl = location.hash.substr(1)
+
+    try {
+      var req = await fetch(taskUrl)
+      if (req.status === 404) {
+        testResultOutput.innerHTML = '作业未上传'
+      } else {
+        let code = await req.text()
+        var div = document.createElement('div')
+        div.innerHTML = code
+        for(let problem in problems) {
+          let testCases = problems[problem]
+          let case1 = testCases[0]
+
+          try {
+            let problemScript = div.querySelector(`[id="${problem}"]`)
+            if (!problemScript) {//没有这个作业的标签
+              outputResult(`<span class="none">${problem}: 没做</span>`)
+              continue
+            }
+            let problemCode = problemScript.textContent
+            if (problemCode.trim().length < 10) {//代码太短
+              outputResult(`<span class="none">${problem}: 没做</span>`)
+              continue
+            }
+            var testResult = testProblemCases(problemCode, testCases)
+            if (testResult === true) {
+              outputResult(`<span class="ac">${problem}: 通过</span>`)
+            } else {
+              outputResult(`<span class="wa" title="${testResult}">${problem}: 未通过(hover查看原因)</span>`)
+            }
+          } catch(e) {
+            console.log(e)
+            outputResult(`<span class="none">${problem}: 没做</span>`)
+          }
+        }
+      }
+    } catch(e) {
+      console.log(e)
+      testResultOutput.innerHTML = '其它错误'
+    }
+  }
+
+  function testProblemCases(problemCode, cases) {
+    var results = cases.map(oneCase => {
+      return testProblem(problemCode, oneCase.input, oneCase.output)
+    })
+    if (results.every(it => it === true)) {
+      return true
+    } else {
+      return results.map((result, i) => {
+        if (result === true) {
+          return `输入：\n${cases[i].input}\n输出[正确]：\n${cases[i].output}`
+        } else {
+          return result
+        }
+      }).join('\n\n')
+    }
+  }
+</script>
+</html>

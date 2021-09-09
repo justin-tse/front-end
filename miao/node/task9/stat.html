@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    .uploaded {
+      background-color: #2ECC40;
+    }
+  </style>
+</head>
+<body>
+  <button onclick="location.reload()">重新加载</button>
+  <div id="result"></div>
+</body>
+<script>
+  var targetUrl = location.hash.substr(1)
+  var userName = targetUrl.match(/\/\/(.*)\.github\.io/)[1]
+  console.log(userName)
+
+  var tasks = window.top.tasks.map(it => it.replace('[username]', userName))
+  console.log(tasks)
+
+  main()
+
+  async function main(){
+    var taskStats = await Promise.all(tasks.map(isTaskUploaded))
+    var result = tasks.map((url, i) => {
+      if (taskStats[i]) {
+        return `<div class="uploaded">${url}</div>`
+      } {
+        return `<div class="notuploaded">${url}</div>`
+      }
+    })
+
+    document.querySelector('#result').innerHTML = result.join('')
+  }
+
+  function isTaskUploaded(url) {
+    return new Promise((resolve, reject)=> {
+      fetch(url, {method:'HEAD'}).then(res => {
+        if (res.status === 200) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      }).catch(err => {
+        resolve(false)
+      })
+    })
+  }
+
+</script>
+</html>

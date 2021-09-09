@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tasks</title>
+  <style>
+    html {
+      box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    .task-show {
+      column-gap: 8px;
+    }
+
+    .item {
+      display: inline-block;
+      width: 100%;
+    }
+
+    h3 {
+      margin: 0;
+    }
+
+    h3 img {
+      width: 16px;
+      vertical-align: middle;
+    }
+
+    iframe {
+      display: block;
+      height: 400px;
+      width: 100%;
+      border: 3px solid;
+      border-radius: 10px;
+    }
+
+    .uploaded {
+      background-color: #2ECC40;
+    }
+
+    .stat {
+      display: inline-block;
+      width: 18%;
+      flex-grow: 1;
+      height: 400px;
+      border: 2px solid;
+      overflow: auto;
+    }
+
+    .stat ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .stat ul a {
+      color: blue;
+      text-decoration: none;
+    }
+
+    .stat ul a:hover {
+      /* color: blue; */
+      color:palegreen;
+      text-decoration: none;
+    }
+    .stat .preview {
+      position: fixed;
+      top: 10px;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      background-color: #fff;
+      overflow: auto;
+      border: 3px solid black;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .stat .preview iframe {
+      display: block;
+      width: 100%;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      box-shadow: 0 5px 5px #ccc;
+      margin: 0 -8px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <h2 class="header">
+      <span>选择作业：</span>
+      <select v-model="selectedTask">
+        <option value="">请选择</option>
+        <option v-for="task in tasks" :value="task">{{task}}</option>
+      </select>
+
+      列数({{columnCount}})：<input type="range" min="1" max="10" v-model.number="columnCount">
+
+      高度({{height}})：<input type="range" step="10" min="100" max="1000" v-model.number="height">
+
+      模板：<select v-model="viewTemplate">
+        <option value="">无</option>
+        <option value="view-source.html#">查看源代码</option>
+        <option value="basic-coding-test.html#">基本编程能力测试</option>
+        <option value="oop-test.html#">面向对象练习</option>
+        <option value="stat.html#">统计</option>
+      </select>
+
+      <button @click="showStat = !showStat">切换统计</button>
+    </h2>
+
+    <section v-if="showStat" style="display: flex;flex-wrap: wrap;">
+      <stat v-for="user of users" :user="user"></stat>
+    </section>
+
+
+    <div class="task-show" :style="{columnCount: columnCount}">
+      <task-show
+        v-for="(url, index) in taskUrls"
+        :height="height"
+        :user="users[index]"
+        :src-url="selectedTask.replace('[username]', users[index][0])"
+        :view-url="url"
+        :index="index">
+      </task-show>
+    </div>
+  </div>
+</body>
+<script src="vue.js"></script>
+<script>
+  var users = [
+    ['zhhanging', '8421-张行'],
+    ['justin-tse', '8427-谢发'],
+    ['yuxiang-yang', '8421-杨宇翔'],
+    ['myh759900469', '8418-茅逸灏'],
+    ['Ahui-qn', '8518-阳荣辉'],
+    ['Joamg', '8421-刘书佳'],
+    ['wp999', '8407-王鹏'],
+    ['Birdy789', '8417-何家慧'],
+    ['joezhoux', '8436-周江霖'],
+    ['Celestial-Plato', '8431-傅钰倚'],
+    ['WhiteGardenia2014', '8409-关腾飞'],
+    ['MatRunner', '8407-杨逸'],
+    ['Username-Adrian', '8518-王鹏'],
+    ['Aut1smer', '8418-程胤'],
+    ['richlau007', '8427-刘旺富'],
+    ['versarr', '8411-邱田'],
+    ['Penguin-Meat', '8430-范启培'],
+    ['Nagihiko-szz', '8418-翁英浩'],
+    ['freyja-wion', '8421-赫浩然'],
+    ['islanders-zz', '8430-赵勇'],
+    ['nitpfy', '8888-潘福杨'],
+    ['finnshaw', '8431-肖锋'],
+    ['jinchangyi', '8425-金长毅'],
+    ['lips5476', '8427-郦鹏'],
+    ['hzzzy111', '8407-黄镇业'],
+    ['WangDarc', '8409-王琦'],
+    ['ben179392081', '8409-谢和榕'],
+    ['xianqin163', '8417-晏先琴'],
+    ['xupupeng', '8425-徐普鹏'],
+    ['talangzhe005', '8425-崔伟楠'],
+    ['QingjiaTsang', '8427-曾庆嘉'],
+    ['museye-yq', '8425-尹青'],
+    ['beasajane', '8518-张亮亮'],
+    ['grey4v4', '8411-高明红'],
+    ['appmocca', '8430-许逸飞'],
+    ['Alone943','8417-谢菲'],
+    ['ningmengk','8430-吴江涛'],
+    ['zmmmc','8436-邹美超'],
+    ['alizhim','8431-李志明'],
+    ['gc1908','8518-高超'],
+    ['Machineeeee','8436-马星'],
+    ['yufeng727', '8411-邓淑君'],
+    ['zuoheng1', '8888-左衡'],
+    ['userHRZ', '8407-黄荣臻'],
+    ['zhengwenikiru', '8418-郑文'],
+    ['Wiver-wen', '8412-文淞'],
+    ['Zyl990506', '8412-张永乐'],
+    ['Aimerxiaobei', '8412-马谡昱'],
+    ['FengRuiBin', '8412-冯睿彬'],
+    ['raysuner', '8412-邹调清'],
+    ['zhaodongwei160', '8431-赵东伟'],
+    ['xiaoyegecode', '8501-文继业'],
+    ['duccck', '8501-吴显刚'],
+    ['14february', '8501-庾瑞'],
+    ['a02021', '8501-李立'],
+    ['PKY-IMO', '8415-潘柯芋'],
+    ['lamvyc', '8888-lamvyc'],
+    ['lizhaoluaccess', '8415-lizhaoluaccess'],
+  ]//.map(it => it.slice(0, 1).concat(''))
+
+  var tasks = [
+    `https://[username].github.io/miao/mini-regex101.html`,
+    `https://[username].github.io/miao/solar-system.html`,
+    `https://[username].github.io/miao/moving-box.html`,
+    `https://[username].github.io/miao/paintboard.html`,
+    `https://[username].github.io/miao/drag.html`,
+    `https://[username].github.io/miao/detect-triple-click.html`,
+    `https://[username].github.io/miao/mouse-trail.html`,
+    `https://[username].github.io/miao/mouse-shadow.html`,
+    `https://[username].github.io/miao/tabs.html`,
+    `https://[username].github.io/miao/conway-life.html`,
+    `https://[username].github.io/miao/notebook.html`,
+    `https://[username].github.io/miao/autocompletion.html`,
+    `https://[username].github.io/miao/js-workbench.html`,
+    `https://[username].github.io/miao/snake.html`,
+    `https://[username].github.io/miao/game2.html`,
+    `https://[username].github.io/miao/game3.html`,
+    `https://[username].github.io/miao/game4.html`,
+    `https://[username].github.io/miao/reg-railway.html`,
+
+    `https://[username].github.io/miao/a.txt`,
+    `https://[username].github.io/miao/garden.html`,
+    `https://[username].github.io/miao/red-paragraph.html`,
+    `https://[username].github.io/miao/html-basic.html`,
+    `https://[username].github.io/miao/css-selector-practise.html`,
+    `https://[username].github.io/miao/css-font-text-practise.html`,
+    `https://[username].github.io/miao/block-basic.html`,
+    `https://[username].github.io/miao/css-triangle.html`,
+    `https://[username].github.io/miao/css-block-grid.html`,
+    `https://[username].github.io/miao/css-block-layout.html`,
+    `https://[username].github.io/miao/qq-mail-block.html`,
+    `https://[username].github.io/miao/qq-mail-inline.html`,
+    `https://[username].github.io/miao/qq-mail-position.html`,
+    `https://[username].github.io/miao/qq-mail-float.html`,
+    `https://[username].github.io/miao/qq-mail-flex.html`,
+    `https://[username].github.io/miao/oald-layout-block.html`,
+    `https://[username].github.io/miao/oald-layout-inline.html`,
+    `https://[username].github.io/miao/oald-layout-position.html`,
+    `https://[username].github.io/miao/oald-layout-float.html`,
+    `https://[username].github.io/miao/oald-layout-flex.html`,
+    `https://[username].github.io/miao/css-sprite.html`,
+    `https://[username].github.io/miao/css-glassy.html`,
+    `https://[username].github.io/miao/div-img-contain.html`,
+    `https://[username].github.io/miao/twitter-heart.html`,
+    `https://[username].github.io/miao/ios-checkbox.html`,
+    `https://[username].github.io/miao/css-menu.html`,
+    `https://[username].github.io/miao/normal-flow-horizontal.html`,
+    `https://[username].github.io/miao/radio-slider.html`,
+    `https://[username].github.io/miao/9-grid.html`,
+    `https://[username].github.io/miao/mobike.html`,
+    `https://[username].github.io/miao/mi/index.html`,
+    `https://[username].github.io/miao/abs-center.html`,
+    `https://[username].github.io/miao/iconfont.html`,
+    `https://[username].github.io/miao/input-beauty.html`,
+    `https://[username].github.io/miao/background-practise.html`,
+    `https://[username].github.io/miao/jiefangcheng.html`,
+    `https://[username].github.io/miao/noi.html`,
+    `https://[username].github.io/miao/paint.html`,
+    `https://[username].github.io/miao/css-3d.html`,
+    `https://[username].github.io/miao/css-3d.html`,
+    `https://[username].github.io/miao/link-effect.html`,
+    `https://[username].github.io/miao/mobile.html`,
+    `https://[username].github.io/miao/balloon-css.html`,
+    `https://[username].github.io/miao/footer-at-bottom.html`,
+    `https://[username].github.io/miao/fullstory-footer.html`,
+    `https://[username].github.io/miao/bootstrap-table.html`,
+    `https://[username].github.io/miao/css-abs-center.html`,
+    `https://[username].github.io/miao/css-slider.html`,
+    `https://[username].github.io/miao/css-layout-02.html`,
+    `https://[username].github.io/miao/css-doraemon.html`,
+    `https://[username].github.io/miao/css-background.html`,
+    `https://[username].github.io/miao/css-layout-1.html`,
+    `https://[username].github.io/miao/css-inline-layout.html`,
+    `https://[username].github.io/miao/basic-coding.html`,
+
+
+    // `https://[username].github.io/miao/a.html`,
+    // `https://[username].github.io/miao/oop.js`,
+    // `http://[username].coding.me/task/css-practise01.html`,
+    // `http://[username].coding.me/task/css-link-effect.html`,
+    // `https://[username].coding.me/task/openjudge.html`,
+  ]
+</script>
+<script>
+  Vue.component('stat', {
+    props: ['user'],
+    template: `
+      <div class="stat" :style="{order: uploadedCount, margin: '3px'}">
+        <h3 :title="user[1]">
+          {{user[1].slice(0, 6) + '*'.repeat(user[1].slice(6).length)}}:
+          <a target="_blank" :href="'https://github.com/' + user[0] + '/miao'">
+            {{uploadedCount}}
+          </a>
+          <button @click="refresh">刷新</button>
+          <button @click="showPreview = true">预览所有</button>
+        </h3>
+        <ul>
+          <li v-for="(task,index) of tasks" :class="taskStats[index] ? 'uploaded' : 'unloaded'">
+            <a :href="task">{{getTaskName(task)}}</a>
+          </li>
+        </ul>
+        <div class="preview" v-if="showPreview">
+          <button @click="showPreview = false">关闭</button>
+          <div v-for="(isUpload, idx) of taskStats" v-if="isUpload">
+            <h2>{{tasks[idx]}}</h2>
+            <iframe :src="tasks[idx]"></iframe>
+          </div>
+        </div>
+      </div>
+    `,
+    data() {
+      var tasks = window.tasks
+      return {
+        tasks: tasks.map(it => it.replace('[username]', this.user[0])),
+        taskStats: [],
+        uploadedCount: 0,
+        tried: 0,
+        showPreview: false,
+      }
+    },
+    methods: {
+      refresh() {
+        this.getStat()
+      },
+      getTaskName(url) {
+        var pos = url.indexOf('miao')
+        return url.slice(pos + 5)
+      },
+      async getStat() {
+        this.tried++
+        this.taskStats = await Promise.all(this.tasks.map(isTaskUploaded))
+        this.uploadedCount = this.taskStats.filter(it => it).length
+
+        if (this.uploadedCount === 0 && this.tried < 5) {
+          this.getStat()
+        }
+
+        function isTaskUploaded(url) {
+          return new Promise((resolve, reject) => {
+            fetch(url, { method: 'HEAD' }).then(res => {
+              if (res.status === 200) {
+                resolve(true)
+              } else {
+                resolve(false)
+              }
+            }).catch(err => {
+              resolve(false)
+            })
+          })
+        }
+      }
+    },
+    mounted() {
+      this.getStat()
+    }
+  })
+
+  Vue.component('task-show', {
+    props: ['user', 'srcUrl', 'viewUrl', 'index', 'height'],
+    data() {
+      return {
+        nickName: this.user[0],
+        realName: this.user[1],
+      }
+    },
+    template: `
+      <div class="item">
+        <h3>
+          {{index + 1}}.<a target="_blank" :title="realName" :href="viewUrl">{{nickName.slice(0, 5)}}...</a> |
+          <a target="_blank" :href="srcUrl">Source</a> |
+          <a target="_blank" :href="'https://github.com/' + nickName" target="_blank">Github</a>
+          <button @click="refresh">刷新</button>
+        </h3>
+        {{srcUrl}}
+        <iframe ref="iframe" :style="{height: height + 'px'}" :src="viewUrl" frameborder="1"></iframe>
+      </div>
+    `,
+    methods: {
+      refresh(e) {
+        this.$refs.iframe.src = ''
+        setTimeout(() => {
+          this.$refs.iframe.src = this.viewUrl
+        }, 50)
+      }
+    }
+  })
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      showStat: false,
+      users: users,
+      tasks: tasks,
+      selectedTask: '',
+      columnCount: 4,
+      height: 520,
+      showSource: true,
+      viewTemplate: ''
+    },
+    watch: {
+      viewTemplate(newVal) {
+        if (newVal == 'basic-coding-test.html#') {
+          this.selectedTask = 'https://[username].github.io/miao/noi.html'
+          // this.height =
+        }
+      },
+      selectedTask(newTask) {
+        if (newTask == 'https://[username].github.io/miao/paint.html') {
+          this.columnCount = 2
+          this.viewTemplate = ''
+          this.height = 500
+        }
+      }
+    },
+    computed: {
+      taskUrls() {
+        if (this.selectedTask == '') {
+          return []
+        } else {
+          return this.users.map(([nickName, realName]) => {
+            return this.viewTemplate + this.selectedTask.replace('[username]', nickName)
+          })
+        }
+      }
+    }
+  })
+</script>
+
+</html>
