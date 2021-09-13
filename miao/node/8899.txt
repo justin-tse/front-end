@@ -64,6 +64,7 @@ server.on('request', async (req, res) => {
 
     if (stat.isFile()) {
       try {
+        var data = await fsp.readFile(targetPath)
         var type = mime.getType(targetPath)
 
         if (cors) {
@@ -73,7 +74,8 @@ server.on('request', async (req, res) => {
           'Content-Type': type,
         })
 
-        fs.createReadStream(targetPath).pipe(res)
+        res.write(data)
+        res.end()
       } catch (err) {
         console.log(err)
         if (err.code == 'ENOENT') { // 目标的文件不存在
