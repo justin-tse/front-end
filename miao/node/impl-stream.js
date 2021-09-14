@@ -51,7 +51,7 @@ function createFileReadStream(filePath) {
   var fd = fs.openSync(filePath)
   var pos = 0
 
-  return new Readable({
+  var r = new Readable({
     read() {
       var size = 2048
       var buf = Buffer.alloc(size)
@@ -69,6 +69,7 @@ function createFileReadStream(filePath) {
 
     }
   })
+  return r
 }
 
 // var readable = createFileReadStream('./package-lock.json')
@@ -81,7 +82,7 @@ function createFileReadStream(filePath) {
 function createFileWriteStream(filePath) {
   var fd = fs.openSync(filePath, 'w')
   var pos = 0
-  return new Writable({
+  var w = new Writable({
     // 使用者write进本可写流的数据，会被流的调度系统调用这个函数来消费
     write(chunk, encoding, callback) {
       fs.write(fd, chunk, 0, chunk.length, pos, (err, bytesWritten) => {
@@ -90,6 +91,8 @@ function createFileWriteStream(filePath) {
       })
     }
   })
+
+  return w
 }
 
 console.log(process.pid)
@@ -105,15 +108,8 @@ createFileReadStream('./package-lock.json')
 // )
 
 
+
 // class Xxxxxx extends Writable {
-//   constructor() {
-//     super({ })
-
-//   }
-//   _read() { }
-//   _transform() {
-
-//   }
 //   _write() {
 
 //   }
