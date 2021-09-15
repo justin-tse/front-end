@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>网盘 UI</h1>
+
+  <p>
+    当前路径 <input type="text" value="/" id="curPath">
+    <button id="goUp">上一级</button>
+    <label>上传<input hidden type="file" id="fileUpload"></label>
+    <button>新建文件夹</button>
+
+    <pre id="dir-content"></pre>
+
+    <div id="edit" hidden>
+      <div><span id="edit-file-path"></span></div>
+      <div><textarea name="" id="" cols="30" rows="10"></textarea></div>
+      <div>
+        <button id="save">保存</button>
+        <button id="cancel">取消</button>
+      </div>
+    </div>
+
+  </p>
+  <script src="jquery-3.6.0.min.js"></script>
+  <script>
+    $(function() {
+      async function updateDirContent() {
+        var path = curPath.value
+        location.hash = path
+        var text = await $.get(path)
+        var html = text.split('\n').map(name => {
+          return `<span><a target="_blank" href="${path}${name}">${name}</a> <strong>&times;</strong></span>`
+        }).join('\n')
+        $("#dir-content").html(html)
+      }
+      curPath.value = location.hash ? decodeURIComponent(location.hash.slice(1)) : '/'
+      updateDirContent()
+
+      function startEdit(path, content) {
+        $('#edit').show().find('#edit-file-path').text(path).end().find('textarea').val(content)
+      }
+
+      $('#edit')
+        .on('click', '#save', async function(e) {
+          var path = $('#edit').find('#edit-file-path').text()
+          var content = $('#edit').find('textarea').val()
+          await $.ajax(path, {
+            method: 'put',
+            data: content
+          })
+          alert('保存成功')
+          $('#edit').hide()
+        })
+        .on('click', '#cancel', function(e) {
+          $('#edit').hide()
+        })
+
+      $('#dir-content')
+        .on('click', 'a', async function(e) {
+          var path = $(this).attr('href')
+          if (path.includes('.')) {
+            var TEXT_FILE_RE = /\.(txt|js|css|html)$/
+            if (TEXT_FILE_RE.test(path)) {//文本文件
+              e.preventDefault()
+              var content = await $.get(path)
+              startEdit(path, content)
+            }
+          } else {
+            e.preventDefault()
+            curPath.value = path + '/'
+            updateDirContent()
+          }
+        })
+        .on('click', 'a + strong', async function(e) {
+          var path = $(this).prev().attr('href')
+          if (!confirm('确定要删除吗？')) {
+            return
+          }
+          await $.ajax(path, {
+            method: 'delete'
+          })
+          alert('删除成功')
+          updateDirContent()
+        })
+
+      $('#goUp').on('click', function(e) {
+        var path = curPath.value
+        var pathParts = path.split('/')
+        if (pathParts.length < 3) {
+          return
+        }
+        pathParts.splice(-2, 1)
+        var targetPath = pathParts.join('/')
+        curPath.value = targetPath
+        updateDirContent()
+      })
+
+      $('#fileUpload').on('change', function(e) {
+        var file = this.files[0]
+        console.log(file)
+        var fr = new FileReader()
+        fr.onload = function() {
+          var xhr = new XMLHttpRequest()
+          xhr.open('PUT', curPath.value + file.name)
+          xhr.onload = function() {
+            alert('上传成功')
+            updateDirContent()
+          }
+          xhr.send(fr.result)
+        }
+        fr.readAsArrayBuffer(file)
+      })
+
+    })
+  </script>
+</body>
+</html>
