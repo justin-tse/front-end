@@ -38,7 +38,11 @@ server.on('connection', (conn) => {
       messages.push(info)
       saveMessages()
 
-      conn.write('HTTP/1.1 301 please goto this url\r\n')
+      // conn.end()
+
+      // url = '/'
+
+      conn.write('HTTP/1.1 301 Found\r\n')
       conn.write('Location: /\r\n')
       conn.write('\r\n')
 
@@ -63,7 +67,7 @@ server.on('connection', (conn) => {
         </form>
       `)
 
-      for (var i = messages.length - 1; i >= 0; i--) {
+      for (var i = messages.length - 1; i > 0; i--) {
         var msg = messages[i]
 
         conn.write(`
@@ -93,7 +97,7 @@ server.on('connection', (conn) => {
 
 })
 
-var port = 808
+var port = 80
 
 // 让服务端开始监听
 server.listen(port, () => {
@@ -102,17 +106,19 @@ server.listen(port, () => {
 })
 
 
+var querystring = require('querystring')
 
-// name=zhangshan&message=hello%3F&age=28
+// name=zhangshan&message=hello%20world&age=28
 // {name:'zhangshan', message: 'hello', age:'28'}
 function parseQueryString(str) {
-  var pairs = str.split('&')
-  var obj = {}
-  for (var pair of pairs) {
-    var [key, val] = pair.split('=')
-    obj[key] = decodeURIComponent(val)
-  }
-  return obj
+  return querystring.parse(str)
+  // var pairs = str.split('&')
+  // var obj = {}
+  // for (var pair of pairs) {
+  //   var [key, val] = pair.split('=')
+  //   obj[key] = decodeURIComponent(val)
+  // }
+  // return obj
 }
 
 
