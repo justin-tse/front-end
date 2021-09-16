@@ -13,7 +13,7 @@
     当前路径 <input type="text" value="/" id="curPath">
     <button id="goUp">上一级</button>
     <label>上传<input hidden type="file" id="fileUpload"></label>
-    <button>新建文件夹</button>
+    <button id="mkdir">新建文件夹</button>
 
     <pre id="dir-content"></pre>
 
@@ -27,7 +27,7 @@
     </div>
 
   </p>
-  <script src="jquery-3.6.0.min.js"></script>
+  <script src="jquery-3.6.0.js"></script>
   <script>
     $(function() {
       async function updateDirContent() {
@@ -63,12 +63,12 @@
 
       $('#dir-content')
         .on('click', 'a', async function(e) {
-          var path = $(this).attr('href')
+          var path = $(this).attr('href')// this.getAttribute('href')
           if (path.includes('.')) {
             var TEXT_FILE_RE = /\.(txt|js|css|html)$/
             if (TEXT_FILE_RE.test(path)) {//文本文件
               e.preventDefault()
-              var content = await $.get(path)
+              var content = await fetch(path).then(res => res.text())
               startEdit(path, content)
             }
           } else {
@@ -102,22 +102,44 @@
       })
 
       $('#fileUpload').on('change', function(e) {
-        var file = this.files[0]
-        console.log(file)
-        var fr = new FileReader()
-        fr.onload = function() {
-          var xhr = new XMLHttpRequest()
-          xhr.open('PUT', curPath.value + file.name)
-          xhr.onload = function() {
-            alert('上传成功')
-            updateDirContent()
+        if (this.files.length) {
+          var file = this.files[0]
+          console.log(file)
+          var fr = new FileReader()
+          fr.onload = function() {
+            var xhr = new XMLHttpRequest()
+            xhr.open('PUT', curPath.value + file.name)
+            xhr.onload = function() {
+              alert('上传成功')
+              updateDirContent()
+            }
+            xhr.send(fr.result)
           }
-          xhr.send(fr.result)
+          fr.readAsArrayBuffer(file)
         }
-        fr.readAsArrayBuffer(file)
       })
 
+      $('#mkdir').on('click', async function(e) {
+        var name = prompt('请输入文件夹名称', '新建文件夹')
+        try {
+          await $.ajax(curPath.value + name, {
+            method: 'MKCOL'
+          })
+          alert('成功')
+          updateDirContent()
+        } catch(e) {
+          console.log(e)
+          alert('失败' + e)
+        }
+
+      })
+
+      $(window).on('hashchange', function(e) {
+        curPath.value = location.hash ? decodeURIComponent(location.hash.slice(1)) : '/'
+        updateDirContent()
+      })
     })
+
   </script>
 </body>
 </html>

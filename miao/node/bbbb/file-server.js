@@ -19,6 +19,7 @@ http.createServer(function(request, response) {
 
 function urlToPath(url) {
     var path = require("url").parse(url).pathname;
+    var path = require('path').resolve(path)
     return "." + decodeURIComponent(path);
 }
 
@@ -61,3 +62,14 @@ methods.PUT = function(path, respond, request) {
     });
     request.pipe(outStream);
 };
+
+methods.MKCOL = function (path, respond, request) {
+    fs.mkdir(path, (err) => {
+        if (err) {
+            console.log(err)
+            respond(400, 'dir already exist')
+        } else {
+            respond(204)
+        }
+    })
+}
