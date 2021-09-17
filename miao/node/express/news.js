@@ -17,4 +17,4 @@ news.get('/sport', (req, res, next) => {
 })
 news.use('/yule', yule)
 
-module.exports = news
+// module.exports = news
