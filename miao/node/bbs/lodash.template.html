@@ -1,0 +1,86 @@
+<script>
+  function escape(s) {
+    // Converts the characters "&", "<", ">", '"', and "'" in string to their corresponding HTML entities.
+    var ans = ""
+    for (let i = 0; i < s.length; i++) {
+        switch (s[i]) {
+            case "&":
+                ans += "&amp;";
+                break;
+            case "<":
+                ans += "&lt;";
+                break;
+            case ">":
+                ans += "&gt;";
+                break;
+            case "\"":
+                ans += "&quot;";
+                break;
+            case "\'":
+                ans += "&apos;";
+                break;
+            default:
+                ans += s[i];
+        }
+    }
+    return ans
+  }
+
+
+  var tpl = `
+    <%= name.repeat(3) %>同学"，"在<%- activity %>活动中获得了<%= score %>。特发此证。
+
+    <ul>
+    <% for (var item of list) { %>
+        <li><%= item %></li>
+        <% if ( item > 2 ) { %>
+          xxxxxxxxxxxxx
+        <% } else { %>
+          yyyyyyyyyyyyyy
+        <% } %>
+    <% } %>
+    </ul>
+  `
+
+  // 实现方法：通过将模板转换为函数来做到模板的编译
+  function template(tpl) {
+    var re = /\<\%|\%\>/g
+    var tplParts = tpl.split(re)
+    console.log(tplParts)
+    var code = 'var result = []\nwith(data) {\n'
+    for (var i = 0; i < tplParts.length; i++) {
+      var part = tplParts[i]
+      if (i % 2 == 0) { // 偶数下标项
+        code += 'result.push("'+ part.replaceAll('\n', '\\n').replaceAll('"', '\\"') + '")\n'
+      } else {  // 奇数下标项
+        if (part[0] == '=') { // 非转义插值
+          code += 'result.push(' + part.slice(1).trim() + ')\n'
+        } else if (part[0] == '-') { // 转义插值
+          code += 'result.push(escape(' + part.slice(1).trim() + '))\n'
+        } else { // 直接拼接模板中的代码到目标代码
+          code += part.trim() + '\n'
+        }
+      }
+    }
+    code += '}\n'
+    code += 'return result.join("")'
+    // console.log(code)
+    return new Function('data', code)
+  }
+
+  var data = {
+    activity: '<script>alert(2)<\/script>游泳',
+    name: '张三',
+    score: '第一名',
+    list: [1,2,3,4,5],
+  }
+
+  var tplFunc = template(tpl)
+  var str = tplFunc(data)
+
+  console.log(str)
+
+  // <%= "hello " + user%>!
+  // <% print("hello " + user); %>!
+
+</script>

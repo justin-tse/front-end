@@ -1,0 +1,22 @@
+extends layout.pug
+
+block content
+  h2= post.title
+  span= post.timestamp
+  fieldset= post.content
+  hr
+
+  each comment in comments
+    fieldset
+      legend= comment.commentBy + '(' + comment.timestamp + ')'
+      p= comment.content
+
+  if isLogin
+    form(action=`/comment/post/${post.id}` method="POST")
+      h3 发表评论
+      div: textarea(name="content")
+      button 开怼
+  else
+    p
+      | 想发表评论？请
+      a(href="/login") 登陆

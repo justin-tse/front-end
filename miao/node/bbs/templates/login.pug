@@ -1,0 +1,12 @@
+extends layout.pug
+
+block content
+  h2 登陆
+  form(action='/login' method='POST')
+    div Username:
+    input(type='text' name='name')
+    div Password:
+    input(type='password' name='password')
+    input(hidden='' name='return_to' value=referer || '/')
+    br
+    button 登陆

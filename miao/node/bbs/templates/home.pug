@@ -1,0 +1,19 @@
+extends layout.pug
+
+block content
+  ul
+    each post of posts
+      li
+        a(href="/post/" + post.id)= post.title
+        | #{" by "}
+        span= post.postedBy
+  p
+    if page > 1
+      a(href=`/?page=${page - 1}`) 上一页
+    |
+    |
+    span= page
+    |
+    |
+    if (page !== totalPage)
+      a(href=`/?page=${page + 1}`) 下一页

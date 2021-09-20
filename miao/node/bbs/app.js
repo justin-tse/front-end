@@ -1,11 +1,33 @@
-const exp = require('constants')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const fs = require('fs')
-const escape = require('lodash/escape')
 
 const port = 8008
 const app = express()
+
+// app.set('view engine', 'pug') // 模板默认扩展名，render时可以不写
+app.set('views', __dirname + '/templates')
+app.locals.pretty = true // 让pug输出格式化过的html
+// app.engine('html', require('hbs').__express); // html扩展名的模板使用hbs包来render
+
+// __tpl扩展名的模板使用这个函数来转换
+app.engine('__tpl', function (filename, data, cb) {
+  fs.readFile(filename, (err, content) => {
+    if (err) {
+      cb(err)
+      return
+    }
+    var tpl = content.toString()
+    var i = 0
+    var result = tpl.replace(/_+/g, function() {
+      return data[i++]
+    })
+    cb(null, result)
+  })
+})
+
+// _______同学，在____年度，获得____奖.
+
 
 const users = loadfile('./users.json')
 const posts = loadfile('./posts.json')
@@ -37,6 +59,7 @@ app.use(express.static(__dirname + '/static'))
 app.use(express.json()) // 解析json请求体的中间件
 app.use(express.urlencoded()) // 解析url编码请求体的中间件
 
+// 将用户是否登陆放到req的isLogin字段上的中件间
 app.use((req, res, next) => {
   if (req.signedCookies.loginUser) {
     req.isLogin = true
@@ -48,51 +71,42 @@ app.use((req, res, next) => {
   next()
 })
 
+app.get('/tpl-test', (req, res, next) => {
+  res.render('aaa.__tpl', ['张三','2077', '青铜'])
+})
+
+app.get('/tpl-test2', (req, res, next) => {
+  res.render('aaa.hbs', {a:1,b:2})
+})
+
 app.get('/', (req, res, next) => {
   res.setHeader('Content-Type', 'text/html; charset=UTF-8')
   console.log('当前登陆用户', req.signedCookies.loginUser)
   var page = Number(req.query.page || 1)
   var pageSize = 10
+  var totalPage = Math.ceil(posts.length / pageSize) // 总页码
   var startIdx = (page - 1) * pageSize
   var endIdx = startIdx + pageSize
   var pagePosts = posts.slice(startIdx, endIdx)
 
   if (pagePosts.length == 0) {
-    res.end('no this page')
+    res.render('404.pug')
     return
   }
 
-  res.end(`
-    <h1>BBS</h1>
-    <div>
-      ${
-        req.isLogin ?
-          `
-            <a href="/post">发贴</a>
-            <a href="/logout">登出</a>
-          ` : `
-            <a href="/login">登陆</a>
-            <a href="/register">注册</a>
-          `
-      }
-    </div>
-    <ul>
-      ${
-        pagePosts.map(post => {
-          return `<li><a href="/post/${escape(post.id)}">${escape(post.title)}</a> by <span>${post.postedBy}</span></li>`
-        }).join('\n')
-      }
-    </ul>
-    <p>
-      <a href="/?page=${page - 1}">上一页</a>
-      <a href="/?page=${page + 1}">下一页</a>
-    </p>
-  `)
+  res.render('home.pug', {
+    isLogin: req.isLogin,
+    posts: pagePosts,
+    page: page,
+    totalPage: totalPage,
+  })
 })
 
 app.route('/post')
 .get((req, res, next) => {
-  res.sendFile(__dirname + '/static/post.html')
+  res.render('issue-post.pug', {
+    isLogin: req.isLogin
+  })
 })
 .post((req, res, next) => {
   var postInfo = req.body
@@ -116,49 +130,13 @@ app.get('/post/:id', (req, res, next) => {
   var post = posts.find(it => it.id == postId)
   if (post) {
     var postComments = comments.filter(it => it.postId == postId)
-    res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-    res.end(`
-      <h1>BBS</h1>
-      <div>
-        ${
-          req.signedCookies.loginUser ?
-            `
-              <a href="/post">发贴</a>
-              <a href="/logout">登出</a>
-            ` : `
-              <a href="/login">登陆</a>
-              <a href="/register">注册</a>
-            `
-        }
-      </div>
-      <h2>${escape(post.title)}</h2>
-      <fieldset>${escape(post.content)}</fieldset>
-      <hr>
-
-      ${
-        postComments.map(it => {
-          return `
-            <fieldset>
-              <legend>${escape(it.commentBy)}</legend>
-              <p>${escape(it.content)}</p>
-            </fieldset>
-          `
-        }).join('\n')
-      }
-
-      ${
-        req.isLogin ?
-          `
-            <form action="/comment/post/${postId}" method="POST">
-              <h3>发表评论</h3>
-              <div><textarea name="content"></textarea></div>
-              <button>开怼</button>
-            </form>
-          ` : `<p>想发表评论？请 <a href="/login">登陆</a>`
-      }
-    `)
+    res.render('post.pug', {
+      isLogin: req.isLogin,
+      post: post,
+      comments: postComments,
+    })
   } else {
-    res.end('404 post not found')
+    res.render('404.pug')
   }
 })
 
@@ -174,13 +152,13 @@ app.post('/comment/post/:id', (req, res, next) => {
 
     res.redirect(req.headers.referer || '/')
   } else {
-    res.end('not login')
+    res.render('not-login.pug')
   }
 })
 
 app.route('/register')
 .get((req, res, next) => {
-  res.sendFile(__dirname + '/static/register.html')
+  res.render('register.pug')
 })
 .post((req, res, next) => {
   var regInfo = req.body
@@ -198,26 +176,16 @@ app.route('/register')
   } else {
     regInfo.id = users.length
     users.push(regInfo)
-    res.end('register success')
+    res.render('register-success.pug')
   }
 })
 
 app.route('/login')
 .get((req, res, next) => {
   // console.log('从哪里进到login页面的：', req.headers.referer)
-  res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-  res.end(`
-    <h1>登陆</h1>
-    <form action="/login" method="POST">
-      <div>Username: </div>
-      <input type="text" name="name">
-      <div>Password: </div>
-      <input type="password" name="password">
-      <input hidden name="return_to" value="${req.headers.referer || '/'}">
-      <br>
-      <button>登陆</button>
-    </form>
-  `)
+  res.render('login.pug', {
+    referer: req.headers.referer
+  })
 })
 .post((req, res, next) => {
   var loginInfo = req.body
@@ -239,8 +207,6 @@ app.get('/logout', (req, res, next) => {
   res.clearCookie('loginUser')
   res.redirect(req.headers.referer || '/')
 })
-
-
 
 
 app.listen(port, () => {
