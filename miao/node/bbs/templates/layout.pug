@@ -4,6 +4,7 @@ html
   head
     meta(charset='UTF-8')
     link(rel="stylesheet", href="/bootstrap.min.css")
+    script(src="/jquery-3.6.0.min.js")
     title BBS
   body
     div.container
@@ -11,6 +12,8 @@ html
         h1: a(href="/") BBS
         p
           if (isLogin)
+            | 你好, #{loginUser.name}
+            |
             a(href="/post") 发贴
             |
             |

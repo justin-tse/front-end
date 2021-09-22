@@ -1,6 +1,9 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const fs = require('fs')
+const Database = require('better-sqlite3')
+
+const db = new Database(__dirname + '/bbs.sqlite3')
 
 const port = 8008
 const app = express()
@@ -29,26 +32,6 @@ app.engine('__tpl', function (filename, data, cb) {
 // _______同学，在____年度，获得____奖.
 
 
-const users = loadfile('./users.json')
-const posts = loadfile('./posts.json')
-const comments = loadfile('./comments.json')
-
-function loadfile(file) {
-  try {
-    var content = fs.readFileSync(file)
-    return JSON.parse(content)
-  } catch (e) {
-    return []
-  }
-}
-
-setInterval(() => {
-  fs.writeFileSync('./users.json', JSON.stringify(users, null, 2))
-  fs.writeFileSync('./posts.json', JSON.stringify(posts, null, 2))
-  fs.writeFileSync('./comments.json', JSON.stringify(comments, null, 2))
-  console.log('saved')
-}, 5000)
-
 app.use((req, res, next) => {
   console.log(req.method, req.url, req.headers.cookie)
   next()
@@ -62,32 +45,33 @@ app.use(express.urlencoded()) // 解析url编码请求体的中间件
 // 将用户是否登陆放到req的isLogin字段上的中件间
 app.use((req, res, next) => {
   if (req.signedCookies.loginUser) {
+    var name = req.signedCookies.loginUser
     req.isLogin = true
-    // req.loginUser = users.find(it => it.name == req.signedCookies.loginUser)
+    req.loginUser = db.prepare('SELECT * FROM users WHERE name = ?').get(name)
   } else {
     req.isLogin = false
-    // req.loginUser = null
+    req.loginUser = null
   }
   next()
 })
 
-app.get('/tpl-test', (req, res, next) => {
-  res.render('aaa.__tpl', ['张三','2077', '青铜'])
-})
+// app.get('/tpl-test', (req, res, next) => {
+//   res.render('aaa.__tpl', ['张三','2077', '青铜'])
+// })
 
-app.get('/tpl-test2', (req, res, next) => {
-  res.render('aaa.hbs', {a:1,b:2})
-})
+// app.get('/tpl-test2', (req, res, next) => {
+//   res.render('aaa.hbs', {a:1,b:2})
+// })
 
 app.get('/', (req, res, next) => {
-  res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-  console.log('当前登陆用户', req.signedCookies.loginUser)
+  // console.log('当前登陆用户', req.signedCookies.loginUser)
   var page = Number(req.query.page || 1)
-  var pageSize = 10
-  var totalPage = Math.ceil(posts.length / pageSize) // 总页码
-  var startIdx = (page - 1) * pageSize
-  var endIdx = startIdx + pageSize
-  var pagePosts = posts.slice(startIdx, endIdx)
+  var pageSize = 5
+  var totalPost = db.prepare('SELECT count(*) AS total FROM posts').get().total
+  var totalPage = Math.ceil(totalPost / pageSize)
+  var offset = (page - 1) * pageSize
+
+  var pagePosts = db.prepare('SELECT * FROM posts JOIN users ON posts.userId = users.userId LIMIT ? OFFSET ?').all(pageSize, offset)
 
   if (pagePosts.length == 0) {
     res.render('404.pug')
@@ -96,6 +80,7 @@ app.get('/', (req, res, next) => {
 
   res.render('home.pug', {
     isLogin: req.isLogin,
+    loginUser: req.loginUser,
     posts: pagePosts,
     page: page,
     totalPage: totalPage,
@@ -105,7 +90,8 @@ app.get('/', (req, res, next) => {
 app.route('/post')
 .get((req, res, next) => {
   res.render('issue-post.pug', {
-    isLogin: req.isLogin
+    isLogin: req.isLogin,
+    loginUser: req.loginUser,
   })
 })
 .post((req, res, next) => {
@@ -113,13 +99,14 @@ app.route('/post')
   var userName = req.signedCookies.loginUser
 
   if (userName) {
+    var user = db.prepare('SELECT * FROM users WHERE name = ?').get(userName)
     postInfo.timestamp = new Date().toISOString()
-    postInfo.id = posts.length
-    postInfo.postedBy = userName
+    postInfo.userId = user.userId
 
-    posts.push(postInfo)
+    var result = db.prepare('INSERT INTO posts (title, content, userId, timestamp) VALUES (?,?,?,?)')
+      .run(postInfo.title, postInfo.content, postInfo.userId, postInfo.timestamp)
 
-    res.redirect('/post/' + postInfo.id)
+    res.redirect('/post/' + result.lastInsertRowid)
   } else {
     res.end('401 not login')
   }
@@ -127,28 +114,67 @@ app.route('/post')
 
 app.get('/post/:id', (req, res, next) => {
   var postId = req.params.id
-  var post = posts.find(it => it.id == postId)
+  var post = db.prepare('SELECT * FROM posts JOIN users ON posts.userId = users.userId WHERE postId = ?').get(postId)
   if (post) {
-    var postComments = comments.filter(it => it.postId == postId)
+    var comments = db.prepare('SELECT * FROM comments JOIN users ON comments.userId = users.userId WHERE postId = ?').all(postId)
     res.render('post.pug', {
-      isLogin: req.isLogin,
+      isLogin: req.isLogin, // true or false
+      loginUser: req.loginUser, // object or null
       post: post,
-      comments: postComments,
+      comments: comments,
     })
   } else {
     res.render('404.pug')
   }
 })
 
+// DELETE /comment/5 HTTP/1.1
+app.delete('/comment/:id', (req, res, next) => {
+  if (req.loginUser.userId !== req.params.id) {
+    res.status(401).json({
+      code: -1,
+      msg: 'delete failed, not your comment'
+    })
+    return
+  }
+
+  db.prepare('DELETE FROM comments WHERE commentId = ?').run(req.params.id)
+  res.json({
+    code: 0,
+    msg: 'delete success'
+  })
+})
+
+
+// DELETE /post/5 HTTP/1.1
+app.delete('/post/:id', (req, res, next) => {
+  if (req.loginUser.userId !== req.params.id) {
+    res.status(401).json({
+      code: -1,
+      msg: 'delete failed, not your post'
+    })
+    return
+  }
+  db.prepare('DELETE FROM posts WHERE postId = ?').run(req.params.id)
+  db.prepare('DELETE FROM comments WHERE postId = ?').run(req.params.id)
+
+  res.json({
+    code: 0,
+    msg: 'delete success'
+  })
+})
+
 //向帖子发表评论，id为帖子编号
 app.post('/comment/post/:id', (req, res, next) => {
   if (req.isLogin) {
     var comment = req.body
+    var user = req.loginUser // 已登陆用户
     comment.timestamp = new Date().toISOString()
     comment.postId = req.params.id
-    comment.commentBy = req.signedCookies.loginUser
+    comment.userId = user.userId
 
-    comments.push(comment)
+    var result = db.prepare('INSERT INTO comments (content, postId, userId, timestamp) VALUES (@content, @postId, @userId, @timestamp)')
+      .run(comment)
 
     res.redirect(req.headers.referer || '/')
   } else {
@@ -167,15 +193,12 @@ app.route('/register')
 
   if (!USERNAME_RE.test(regInfo.name)) {
     res.status(400).end('username invalid, can only contain digit and letter and _')
-  } else if (users.some(it => it.name == regInfo.name)) {
-    res.status(400).end('username already exists')
-  } else if (users.some(it => it.email == regInfo.email)) {
-    res.status(400).end('email already exists')
   } else if (regInfo.password == 0) {
     res.status(400).end('password may not be empty')
   } else {
-    regInfo.id = users.length
-    users.push(regInfo)
+    var addUser = db.prepare('INSERT INTO users (name, password, email) VALUES (?, ?, ?)')
+    var result = addUser.run(regInfo.name, regInfo.password, regInfo.email)
+    console.log(result)
     res.render('register-success.pug')
   }
 })
@@ -189,7 +212,12 @@ app.route('/login')
 })
 .post((req, res, next) => {
   var loginInfo = req.body
-  var user = users.find(it => it.name == loginInfo.name && it.password == loginInfo.password)
+
+  var userStmt = db.prepare(`SELECT * FROM users WHERE name = '${loginInfo.name}' AND password = '${loginInfo.password}'`)
+  // var userStmt = db.prepare(`SELECT * FROM users WHERE name = 'foo' OR 1 = 1 OR '2' = '2' AND password = 'a'`)
+  // var user = userStmt.get(loginInfo.name, loginInfo.password)
+  var user = userStmt.get()
+
   if (user) {
     res.cookie('loginUser', user.name, {
       signed: true

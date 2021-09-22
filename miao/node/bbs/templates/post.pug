@@ -2,17 +2,25 @@ extends layout.pug
 
 block content
   h2= post.title
+  h3 发贴人：#[a(href="/user/" + post.userId)= post.name]
   span= post.timestamp
   fieldset= post.content
+  if loginUser && post.userId == loginUser.userId
+    button.delete-post.btn.btn-success(data-post-id=post.postId) 删除帖子
+
   hr
 
   each comment in comments
     fieldset
-      legend= comment.commentBy + '(' + comment.timestamp + ')'
+      legend
+        a(href="/user/" + comment.userId)= comment.name
+        | (#{comment.timestamp})
+        if loginUser && comment.userId == loginUser.userId
+          button.delete-comment.btn.btn-primary(data-comment-id=comment.commentId) 删除
       p= comment.content
 
   if isLogin
-    form(action=`/comment/post/${post.id}` method="POST")
+    form(action=`/comment/post/${post.postId}` method="POST")
       h3 发表评论
       div: textarea(name="content")
       button 开怼
@@ -20,3 +28,32 @@ block content
     p
       | 想发表评论？请
       a(href="/login") 登陆
+
+  script.
+    $(function() {
+      $(".delete-comment").on('click', async function(e) {
+        var commentId = this.dataset.commentId
+        console.log('将删除评论', commentId)
+        if (!confirm('确定要删除吗？')) {
+          return
+        }
+        await $.ajax('/comment/' + commentId, {
+          method: 'delete'
+        })
+        // 选中离this最近的祖先fieldset元素
+        $(this).closest('fieldset').remove()
+      })
+
+      $('.delete-post').on('click', async function(e) {
+        var postId = this.dataset.postId
+        if (!confirm('确定要删除吗？')) {
+          return
+        }
+        // DELETE /post/5 HTTP/1.1
+        await $.ajax('/post/' + postId, {
+          method: 'delete'
+        })
+
+        location.href = '/'
+      })
+    })

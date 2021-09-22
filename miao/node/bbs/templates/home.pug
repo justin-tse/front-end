@@ -4,9 +4,9 @@ block content
   ul
     each post of posts
       li
-        a(href="/post/" + post.id)= post.title
+        a(href="/post/" + post.postId)= post.title
         | #{" by "}
-        span= post.postedBy
+        a(href="/user/" + post.userId)= post.name
   p
     if page > 1
       a(href=`/?page=${page - 1}`) 上一页
