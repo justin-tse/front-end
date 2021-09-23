@@ -2,6 +2,21 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const fs = require('fs')
 const Database = require('better-sqlite3')
+const multer = require('multer')
+const path = require('path')
+const svgCaptcha = require('svg-captcha')
+const md5 = val => val
+
+let storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, __dirname + '/uploads')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + Math.random().toString(16).slice(2) + path.extname(file.originalname)) //Appending extension
+  }
+})
+const upload = multer({ storage: storage })
+
 
 const db = new Database(__dirname + '/bbs.sqlite3')
 
@@ -37,10 +52,39 @@ app.use((req, res, next) => {
   next()
 })
 
+
+
 app.use(cookieParser('cookie sign secert')) // cookie签名的密码
 app.use(express.static(__dirname + '/static'))
+app.use('/uploads', express.static(__dirname + '/uploads')) // 用于响应用户上传的头像请求
 app.use(express.json()) // 解析json请求体的中间件
 app.use(express.urlencoded()) // 解析url编码请求体的中间件
+
+
+const sessions = {
+}
+
+setInterval(() => {
+  console.log(sessions)
+}, 5000)
+
+
+
+app.use(function session(req, res, next) {
+  if (!req.cookies.sessionId) {
+    var sessionId = Math.random().toString(16).slice(2)
+
+    res.cookie('sessionId', sessionId)
+    sessions[sessionId] = {}
+    req.session = sessions[sessionId]
+  } else {
+    if (!sessions[req.cookies.sessionId]) {
+      sessions[req.cookies.sessionId] = {}
+    }
+    req.session = sessions[req.cookies.sessionId]
+  }
+  next()
+})
 
 // 将用户是否登陆放到req的isLogin字段上的中件间
 app.use((req, res, next) => {
@@ -107,6 +151,12 @@ app.route('/post')
       .run(postInfo.title, postInfo.content, postInfo.userId, postInfo.timestamp)
 
     res.redirect('/post/' + result.lastInsertRowid)
+    // res.end('<script>location.href="/post/xxx"</script>')
+
+
+    // var post = db.prepare('SELECT * from posts WHERE postId = ?').get(result.lastInsertRowid)
+
+    // res.render('post.pug', { post ,comments: []})
   } else {
     res.end('401 not login')
   }
@@ -130,7 +180,7 @@ app.get('/post/:id', (req, res, next) => {
 
 // DELETE /comment/5 HTTP/1.1
 app.delete('/comment/:id', (req, res, next) => {
-  if (req.loginUser.userId !== req.params.id) {
+  if (req.loginUser.userId !== req.params.id) {//此处有错误，应该拿评论所属用户的id来对比，而req.params.id是评论自己的id
     res.status(401).json({
       code: -1,
       msg: 'delete failed, not your comment'
@@ -196,11 +246,19 @@ app.route('/register')
   } else if (regInfo.password == 0) {
     res.status(400).end('password may not be empty')
   } else {
-    var addUser = db.prepare('INSERT INTO users (name, password, email) VALUES (?, ?, ?)')
-    var result = addUser.run(regInfo.name, regInfo.password, regInfo.email)
+    var addUser = db.prepare('INSERT INTO users (name, password, email, avatar) VALUES (?, ?, ?, ?)')
+    var result = addUser.run(regInfo.name, md5(regInfo.password), regInfo.email, regInfo.avatar)
     console.log(result)
-    res.render('register-success.pug')
+    res.redirect('/login')
   }
+})
+
+app.get('/captcha-img', (req, res, next) => {
+  var captcha = svgCaptcha.create();
+  req.session.captcha = captcha.text;
+
+  res.type('svg');// response Content-Type
+  res.status(200).send(captcha.data);
 })
 
 app.route('/login')
@@ -213,10 +271,15 @@ app.route('/login')
 .post((req, res, next) => {
   var loginInfo = req.body
 
-  var userStmt = db.prepare(`SELECT * FROM users WHERE name = '${loginInfo.name}' AND password = '${loginInfo.password}'`)
+  if (loginInfo.captcha !== req.session.captcha) {
+    res.end('captcha incorrect!')
+    return
+  }
+
+  var user = db.prepare(`SELECT * FROM users WHERE name = ? AND password = ?`).get(loginInfo.name, md5(loginInfo.password))
   // var userStmt = db.prepare(`SELECT * FROM users WHERE name = 'foo' OR 1 = 1 OR '2' = '2' AND password = 'a'`)
   // var user = userStmt.get(loginInfo.name, loginInfo.password)
-  var user = userStmt.get()
+  // var user = userStmt.get()
 
   if (user) {
     res.cookie('loginUser', user.name, {
@@ -231,11 +294,73 @@ app.route('/login')
   }
 })
 
+var changePassMap = {
+  // id: email,
+}
+// 打开忘记密码页面
+app.get('/forget-password', (req, res, next) => {
+  res.render('forget-password.pug')
+})
+// 提交自己的电子邮箱
+app.post('/forget-password', (req, res, next) => {
+  var email = req.body.email
+  // 验证该电子邮箱是否是本网站用户
+
+  var id = Math.random().toString(16).slice(2)
+
+  changePassMap[id] = email
+
+  setTimeout(() => {
+    delete changePassMap[id]
+  }, 20 * 60 * 1000)// 20分钟后删除，让链接失效
+
+  var link = 'http://10.3.3.3:8008/forget-password/' + id
+
+  console.log(link)
+
+  // sendEmail(email, `
+  //   请打开此链接以修改密码：20分钟内有效
+  //   ${link}
+  // `)
+  res.end('邮件已发送，请按邮件提示操作')
+})
+// 从邮箱里打开修改密码的页面
+app.get('/forget-password/:id', (req, res, next) => {
+  var email = changePassMap[req.params.id]
+  if (!email) {
+    res.end('link expired')
+    return
+  }
+  res.render('change-password.pug', {
+    email: email
+  })
+})
+// 提交修改好的密码
+app.post('/forget-password/:id', (req, res, next) => {
+  var email = changePassMap[req.params.id]
+  if (!email) {
+    res.end('link expired')
+    return
+  }
+  if (req.body.password == req.body.password2) {
+    db.prepare('UPDATE users SET password = ? WHERE email = ?').run(md5(req.body.password), email)
+    res.end('ok!')
+  } else {
+    res.end('re type password incorrect!')
+  }
+})
+
 app.get('/logout', (req, res, next) => {
   res.clearCookie('loginUser')
   res.redirect(req.headers.referer || '/')
 })
 
+app.post('/upload', upload.any(), (req, res, next) => {
+  var files = req.files
+  console.log(files)
+  var urls = files.map(file => `http://localhost:8008/uploads/` + file.filename)
+  res.json(urls)
+})
 
 app.listen(port, () => {
   console.log('listening on port', port)

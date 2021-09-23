@@ -7,6 +7,13 @@ block content
     input(type='text' name='name')
     div Password:
     input(type='password' name='password')
+    div Captcha:
+    input(type="text" name="captcha")
+    img(src="/captcha-img")
+
     input(hidden='' name='return_to' value=referer || '/')
     br
     button 登陆
+    |
+    |
+    a(href="/forget-password") 忘记密码?

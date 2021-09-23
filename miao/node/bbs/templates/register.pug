@@ -2,7 +2,7 @@ extends layout.pug
 
 block content
   h2 注册
-  form(action='/register' method='POST')
+  form(action='/register' xenctype="multipart/form-data" method='POST')
     div
       | Username:
       br
@@ -15,4 +15,29 @@ block content
       | Password:
       br
       input(type='password' name='password')
+    div
+      | Avatar:
+      br
+      input(type='file' name='xxx')
+      input(type="hidden" name="avatar")
+
     button 注册
+
+  script.
+    $('[type="file"]').on('change', async function(e) {
+      var file = this.files[0]
+      var fd = new FormData()
+      fd.append('file', file)
+
+
+      var data = await $.ajax('/upload', {
+        method: 'post',
+        data: fd,
+        processData: false,
+        contentType: false,
+      })
+
+      console.log(data)
+
+      $('[type="hidden"]').val(data[0])
+    })
