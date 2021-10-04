@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+  <div id="container">
+
+  </div>
+
+  <script>
+    var {show, editingIdx, todos} = JSON.parse(localStorage.getItem('todosInfo')) || {show: 'all', editingIdx: -1, todos: []}
+    // var show = 'all' // 当前显示的种类
+    // var editingIdx = -1
+    // var todos = [
+    //   {
+    //     text: 'eat',
+    //     done: false,
+    //   },
+    //   {
+    //     text: 'drink',
+    //     done: true,
+    //   },
+    //   {
+    //     text: 'sleep',
+    //     done: false,
+    //   }
+    // ]
+
+    var container = document.querySelector('div#container')
+    updatePage()
+
+    container.addEventListener('click', function(e) {
+      if (e.target.matches('button.delete')) { // 点击来源于删除按钮时
+        var idx = e.target.dataset.idx
+        todos.splice(idx, 1)
+        updatePage()
+      }
+      // if (e.target.matches('button.clear')) { // 点击来源于删除已完成项的按钮
+      //   todos = todos.filter(it => !it.done)
+      //   updatePage()
+      // }
+      if (e.target.matches('li > input[type="checkbox"]')) { // 点击来源于切换按钮
+        var idx = e.target.dataset.idx
+        todos[idx].done = !todos[idx].done
+        updatePage()
+      }
+      if (e.target.matches('input.toggle-all')) { // 点击来源于左上角的checkbox
+        if (todos.every(it => it.done)) {
+          todos.forEach(it => {
+            it.done = false
+          })
+        } else {
+          todos.forEach(it => {
+            it.done = true
+          })
+        }
+        updatePage()
+      }
+
+      if (e.target.matches('input[type="radio"]')) {
+        show = e.target.value
+        updatePage()
+      }
+    })
+    container.addEventListener('dblclick', function(e) {
+      if (e.target.matches('li > span')) {
+        editingIdx = Number(e.target.dataset.idx)
+        updatePage()
+        var editingInput = document.querySelector('ul input[type="text"]')
+        editingInput.focus()
+        editingInput.selectionStart = editingInput.selectionEnd = editingInput.value.length
+      }
+    })
+
+
+
+    container.addEventListener('keyup', function(e) {
+      if (e.target.matches('.todo-input')) {
+        if (e.key == 'Enter') {
+          var text = e.target.value.trim()
+          if (!text) {
+            return
+          }
+          e.target.value = ''
+          todos.push({
+            text,
+            done: false,
+          })
+          updatePage()
+          document.querySelector('.todo-input').focus()
+        }
+      }
+      if (e.target.matches('.edit')) {
+        if (e.key == 'Escape') {
+          editingIdx = -1
+          updatePage()
+        }
+        if (e.key == 'Enter') {
+          var text = e.target.value.trim()
+          var idx = e.target.dataset.idx
+          todos[idx].text = text
+          editingIdx = -1
+          updatePage()
+        }
+      }
+    })
+    container.addEventListener('focusout', function(e) {
+      console.log(e)
+      if (e.target.matches('.edit')) {
+        editingIdx = -1
+        updatePage()
+      }
+    })
+
+    function updatePage() {
+      var dom = renderHTML()
+      console.log(dom)
+      container.innerHTML = ''
+      container.appendChild(dom)
+      save()
+    }
+    function save() {
+      var obj = {
+        todos,show,editingIdx
+      }
+      localStorage.todosInfo = JSON.stringify(obj)
+    }
+
+    function renderHTML() {
+      var html = `
+        <section>
+          <div>
+            <input type="checkbox" class="toggle-all" ${todos.length && todos.every(it => it.done) ? 'checked' : ''}/>
+            <input type="text" class="todo-input" />
+          </div>
+          <ul class="${show}">
+            ${
+              todos.map((todo, idx) => {
+                return `
+                  <li class="${todo.done ? 'completed' : 'active'}">
+                    <input type="checkbox" data-idx="${idx}" ${todo.done ? 'checked' : ''}/>
+                    ${
+                      editingIdx == idx ?
+                        `<input type="text" data-idx="${idx}" class="edit" value="${todo.text}"/>`
+                        :
+                        `<span data-idx="${idx}">${todo.text}</span>`
+                    }
+                    <button class="delete" data-idx="${idx}">Delete</button>
+                  </li>
+                `
+              }).join('\n')
+            }
+          </ul>
+          <div>
+            <span>${todos.filter(it => it.done == false).length} items left</span>
+            <div>
+              <label><input type="radio" name="category" ${show == 'all' ? 'checked' : ''} value="all"/> All</label>
+              <label><input type="radio" name="category" ${show == 'active' ? 'checked' : ''} value="active"/> Active</label>
+              <label><input type="radio" name="category" ${show == 'completed' ? 'checked' : ''} value="completed"/> Completed</label>
+            </div>
+            ${todos.some(it => it.done) ? '<button class="clear" onclick="clearCompleted()">Clear Completed</button>' : ''}
+          </div>
+        </section>
+      `
+
+      // {
+      //   tag: 'section',
+      //   attrs: {
+      //     foo: '1aaaa',
+      //     class: 'sfoiwjef',
+      //     id: 'fiwef'
+      //   },
+      //   children: []
+      // }
+
+      var div = document.createElement('div')
+      div.innerHTML = html
+      return div.firstElementChild
+    }
+
+
+    function clearCompleted() {
+      todos = todos.filter(it => !it.done)
+      updatePage()
+    }
+
+    /**
+     * 存在的问题：
+     *
+     * 更新再小的细节也会刷新整个页面的内容
+     *    只更新需要更新的部分
+     * 需要自行判断交互来源以决定做何种操作，单从html结构中无法得知某元素将有什么样的交互
+     *    让事件处理的代码直接写进html结构中
+     * 数据改变后需要手动调用updatePage()函数
+     *    如果能自动调用就好了
+     *
+     * 其它可以优化的点：
+     *    模板直接写到container元素里
+     *    不使用模板字符串
+     */
+  </script>
+  <style>
+    ul.active li.completed {
+      display: none;
+    }
+    ul.completed li.active {
+      display: none;
+    }
+  </style>
+</body>
+</html>
