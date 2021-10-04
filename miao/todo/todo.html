@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* li.completed span {
+      text-decoration: line-through;
+    }
+    li.completed {
+      background-color: grey;
+    } */
+
+    ul.completed li.active,
+    ul.active li.completed {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>todos</h1>
+  <div>
+    <input type="checkbox" name="" id="toggleSelectAll">
+    <input type="text" id="todoInput">
+  </div>
+  <ul id="todoList" class="all">
+    <!-- <li>
+      <input type="checkbox" name="" id="">
+      <span>eat food</span>
+      <button>&times;</button>
+    </li> -->
+  </ul>
+  <div>
+    <span><em id="count">0</em> items left</span>
+    <div id="labels">
+      <label><input type="radio" checked name="cur" value="all"> All</label>
+      <label><input type="radio" name="cur" value="active"> Active</label>
+      <label><input type="radio" name="cur" value="completed"> Completed</label>
+    </div>
+    <button id="clear" style="display: none;">Clear completed</button>
+  </div>
+
+  <script>
+    const todoInput = document.querySelector('#todoInput')
+    const todoList = document.querySelector('#todoList')
+    const count = document.querySelector('#count')
+    const toggleSelectAll = document.querySelector('#toggleSelectAll')
+    const clearButton = document.querySelector('#clear')
+    const labels = document.querySelector('#labels')
+
+
+    todoInput.addEventListener('keyup', function(e) {
+      if (e.key == 'Enter') {
+        var todoText = todoInput.value.trim()
+        if (!todoText) { // empty string
+          return
+        }
+        todoInput.value = ''
+
+        var li = document.createElement('li')
+        li.classList.add('active')
+
+        var checkbox = document.createElement('input')
+        checkbox.type = 'checkbox'
+        checkbox.onclick = function(e) {
+          if (this.checked) {
+            li.classList.add('completed')
+            li.classList.remove('active')
+          } else {
+            li.classList.add('active')
+            li.classList.remove('completed')
+          }
+
+          if (isAllChecked()) {
+            toggleSelectAll.checked = true
+          } else {
+            toggleSelectAll.checked = false
+          }
+          updateLeftCount()
+          updateClearButton()
+        }
+        var span = document.createElement('span')
+        span.textContent = todoText
+        span.ondblclick = function() {
+          span.contentEditable = true
+          span.selectionStart = span.selectionEnd = 999
+        }
+        span.onblur = function() {
+          span.contentEditable = false
+        }
+        var button = document.createElement('button')
+        button.textContent = '×'
+
+        button.onclick = function() {
+          todoList.removeChild(li)
+          updateLeftCount()
+          updateClearButton()
+        }
+
+        li.append(checkbox, span, button)
+        todoList.append(li)
+
+        updateLeftCount()
+      }
+    })
+
+    toggleSelectAll.addEventListener('click', function(e) {
+      var checkboxes = Array.from(todoList.querySelectorAll('input[type="checkbox"]'))
+      if (isAllChecked()) {
+        checkboxes.forEach(it => {
+          it.checked = false
+        })
+      } else {
+        checkboxes.forEach(it => {
+          it.checked = true
+        })
+      }
+      updateLeftCount()
+      updateClearButton()
+    })
+
+    labels.addEventListener('click', function(e) {
+      if (e.target.matches('input[type="radio"]')) {
+        var c = e.target.value
+        console.log(c)
+        todoList.className = c
+      }
+    })
+
+    function isAllChecked() {
+      return Array.from(todoList.querySelectorAll('input[type="checkbox"]')).every(it => it.checked)
+    }
+
+    function updateLeftCount() {
+      var c = Array.from(todoList.querySelectorAll('input[type="checkbox"]')).filter(it => !it.checked).length
+      count.textContent = c
+    }
+
+    function updateClearButton() {
+      var hasCompleted = Array.from(todoList.querySelectorAll('input[type="checkbox"]')).some(it => it.checked)
+      if (hasCompleted) {
+        clearButton.style.display = 'inline-block'
+      } else {
+        clearButton.style.display = 'none'
+      }
+
+    }
+
+    function elt() {
+
+    }
+  </script>
+</body>
+</html>
