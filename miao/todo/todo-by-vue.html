@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+  <div class="container">
+    <div>
+      <input type="checkbox" class="toggle-all" @click="toggleAll()" :checked="todos.length && todos.every(it => it.done)"/>
+      <input type="text" class="todo-input" @keyup="addTodo($event)"/>
+    </div>
+    <ul :class="show">
+
+      <li :class=" todo.done ? 'completed' : 'active' " v-for="(todo, idx) of todos">
+        <input type="checkbox" :checked="todo.done" @click="todo.done = !todo.done"/>
+        <input @blur="editingIdx = -1" :value="todo.text" @keyup="handleEditKeyup($event)" v-if="editingIdx == idx" type="text">
+        <span @dblclick="editingIdx = idx" v-if="editingIdx !== idx">{{ todo.text }}</span>
+        <button class="delete" @click="deleteItem(idx)">Delete</button>
+      </li>
+
+    </ul>
+    <div>
+      <span>{{ todos.filter(it => !it.done).length }} items left</span>
+      <div>
+        <label><input type="radio" name="category" @click="show = 'all'" :checked="show == `all`" value="all"/> All</label>
+        <label><input type="radio" name="category" @click="show = 'active'" :checked="show == 'active'" value="active"/> Active</label>
+        <label><input type="radio" name="category" @click="show = 'completed'" :checked="show == 'completed'" value="completed"/> Completed</label>
+      </div>
+      <button v-if="todos.some(it => it.done)" @click="clear()">Clear Completed</button>
+    </div>
+  </div>
+
+  <script src="vue.js"></script>
+  <script>
+    // 数据驱动
+    var app = new Vue({
+      el: '.container',
+      data: {
+        show: 'all',
+        editingIdx: -1,
+        todos: [
+          {
+            text: 'eat',
+            done: true,
+          },
+          {
+            text: 'drink',
+            done: false,
+          }
+        ]
+      },
+      methods: {
+        handleEditKeyup(e) {
+          if (e.key == 'Enter') {
+            app.todos[app.editingIdx].text = e.target.value.trim()
+            app.editingIdx = -1
+          }
+          if (e.key == 'Escape') {
+            app.editingIdx = -1
+          }
+        },
+        toggleAll() {
+          if (this.todos.every(it => it.done)) {
+            this.todos.forEach(it => {
+              it.done = false
+            })
+          } else {
+            this.todos.forEach(it => {
+              it.done = true
+            })
+          }
+        },
+        addTodo(e) {
+          if (e.key == 'Enter') {
+            var text = e.target.value.trim()
+            if (!text) {
+              return
+            }
+            e.target.value = ''
+            this.todos.push({
+              text,
+              done: false,
+            })
+          }
+        },
+        deleteItem: function(idx) {
+          this.todos.splice(idx, 1)
+        },
+        clear() {
+          this.todos = this.todos.filter(it => !it.done)
+        },
+        // toggle(idx) {
+        //   this.todos[idx].done = !this.todos[idx].done
+        // }
+      }
+    })
+  </script>
+</body>
+</html>
