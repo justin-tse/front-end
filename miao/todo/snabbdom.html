@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+  <div id="container"></div>
+
+  <script type="module">
+    import {
+      init,
+      classModule,
+      propsModule,
+      styleModule,
+      eventListenersModule,
+      h,
+    } from "https://unpkg.com/snabbdom?module";
+
+    import htm from "https://unpkg.com/htm?module"
+    window.htm = htm
+
+
+    window.patch = init([
+      // Init patch function with chosen modules
+      classModule, // makes it easy to toggle classes
+      propsModule, // for setting properties on DOM elements
+      styleModule, // handles styling on elements with support for animations
+      eventListenersModule, // attaches event listeners
+    ]);
+
+    window.container = document.getElementById("container");
+
+    window.h = h
+
+    function h2(tag, attr, ...children) {
+      return h(tag, attr, children)
+    }
+
+    window.html = htm.bind(h2)
+
+    window.v1 = html`
+      <div id="container">
+        <span>aaa1</span>
+      </div>
+    `
+
+    window.v2 = html`
+      <div id="container" class="foo">
+        <span>aaa2</span>
+        <span>bbb</span>
+      </div>
+    `
+
+    window.v3 = h('div', null, [h('span',null, ['aaa'])])
+    window.v4 = h('div', null, [h('span',null, ['aaa']), h('span',null, ['bbb'])])
+
+//     const vnode = h("div#container.two.classes", { on: { click: () => {} } }, [
+//   h("span", { style: { fontWeight: "bold" } }, "This is bold"),
+//   " and this is just normal text",
+//   h("a", { props: { href: "/foo" } }, "I'll take you places!"),
+// ]);
+// // Patch into empty DOM element – this modifies the DOM as a side effect
+// patch(container, vnode);
+// debugger
+// const newVnode = h(
+//   "div#container.two.classes",
+//   null,
+//   [
+//     h(
+//       "span",
+//       { style: { fontWeight: "normal", fontStyle: "italic" } },
+//       "This is now italic type"
+//     ),
+//     " and this is still just normal text",
+//     h("a", { props: { href: "/bar" } }, "I'll take you places!"),
+//   ]
+// );
+// // Second `patch` invocation
+// patch(vnode, newVnode); // Snabbdom efficiently updates the old view to the new state
+
+
+  </script>
+</body>
+</html>
